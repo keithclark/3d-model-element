@@ -1,0 +1,92 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+html {
+  font: 100% / 1.5 Arial;
+}
+
+body {
+  perspective: 800px;
+  background: linear-gradient(#232629, #111314);
+}
+
+.key {
+  display: inline-block;
+  padding:.25em .5em;
+  background: #fff;
+  box-shadow: 0 2px 1px #666;
+  border-radius: 3px;
+  margin: .1em;
+}
+
+.obj3d {
+  transform-style: preserve-3d;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+.model {
+  width: 300px;
+  height: 300px;
+  margin: -150px;
+  animation: 10s spin linear infinite;
+}
+
+.room__floor {
+  width: 800px;
+  height: 800px;
+  margin: -400px;
+  transform: translate3d(0,200px,0) rotateX(90deg);
+  background-image: 
+    linear-gradient(45deg, currentColor 25%, transparent 25%),
+    linear-gradient(-45deg, currentColor 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, currentColor 75%),
+    linear-gradient(-45deg, transparent 75%, currentColor 75%);
+  background-size: 40px 40px;
+  background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+  background-color:#ded;
+  color: #aba;
+}
+
+@keyframes spin {
+  to {
+    transform: rotateY(1turn);
+  }
+}
+
+/* panels for the demo */
+
+.panel {
+  position: fixed;
+  padding: 1em;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.panel cite {
+  font-style: normal;
+}
+
+.panel a {
+  color: #fc0;
+}
+
+.panel--help {
+  background: rgba(255,255,255,.7);
+  top: 1em;
+  left: 1em;
+}
+
+.panel--about {
+  font-style: normal;
+  background: rgba(0,0,0,.5);
+  bottom: 1em;
+  left: 1em;
+  right: 1em;
+  color: #fff;
+}

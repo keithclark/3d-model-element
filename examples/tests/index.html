@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML model element: Test page</title>
+<style>
+  * {
+    transform-style: preserve-3d;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+  }
+  html {
+    overflow: hidden;
+    font: 100%/1.5 Arial;
+  }
+  body {
+    box-sizing: border-box;
+    background-image: 
+      linear-gradient(45deg, #e4e4e4 25%, transparent 25%),
+      linear-gradient(-45deg, #e4e4e4 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #e4e4e4 75%),
+      linear-gradient(-45deg, transparent 75%, #e4e4e4 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    perspective: 700px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    padding: 1em;
+    margin: auto;
+  }
+
+  .code {
+    padding: 1em;
+    background:#eee;
+    border:2px solid #777;
+  }
+
+  .model {
+    pointer-events: none;
+    display: block;
+    width: 50vmin;
+    height: 50vmin;
+  }
+  .model--small {
+    width: 25vmin;
+    height: 25vmin;
+  }
+  .model--tiny {
+    width: 15vmin;
+    height: 15vmin;
+  }
+  .model--abs {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -25vmin;
+  }
+  .model--abs.model--small {
+    margin: -12.5vmin;
+  }
+  .model--abs.model--tiny {
+    margin: -7.5vmin;
+  }
+  .model--spaced {
+    margin: 1.5rem;
+  }
+
+  .model-wrap {
+    border: 1px dashed green;
+    margin: auto;
+    position: relative;
+  }
+
+  .test {
+    margin-bottom: 20em;
+  }
+  .test__output {
+    font-size: 0;
+    text-align: center;
+    border:1px solid blue;
+    padding:2rem;
+  }
+  .test .model {
+    display: inline-block;
+    border: 1px dashed red;
+  }
+  .test--fail {
+    color: #c00;
+    background: rgba(200,0,0,.2)
+  }
+  .test--fail::before {
+    content: 'FAILING TEST'
+  }
+
+  .test--2 .model {
+    min-width: 10rem;
+    min-height: 10rem;
+  }
+
+  .test--4 .test__output {
+    white-space: nowrap;
+    overflow: scroll;
+  }
+
+  .test--5 .test__output {
+    position: relative;
+    height: 50vmin;
+  }
+
+  .test--6 .model {
+    transition: 1s transform;
+  }
+  .test--6 .test__output:hover .model {
+    transform: rotateY(180deg)
+  }
+
+  .test--8 .model-wrap, .test--9 .model-wrap {
+    height: 50vmin;
+    width: 50vmin;
+  }
+
+  .test--8 .model {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+  }
+
+
+
+  @keyframes spin-xyz {
+    to {
+      transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg);
+    }
+  }
+  @keyframes spin-x {
+    to {
+      transform: rotateX(360deg);
+    }
+  }
+  @keyframes spin-y {
+    to {
+      transform: rotateY(360deg);
+    }
+  }
+  @keyframes spin-z {
+    to {
+      transform: rotateZ(360deg);
+    }
+  }
+  @keyframes swing-x {
+    from {
+      transform: translateX(-25vw);
+    }
+    to {
+      transform: translateX(25vw);
+    }
+  }
+</style>
+</head>
+<body>
+  <h1>Custom element for rendering 3D models and controlling them with CSS</h1>
+  <p>This is test page for a prototype <code>&lt;model&gt;</code> custom element.
+    The model element allows 3D objects to be loaded into a document and rendered
+    inline, just like any other visual resource. Additionally, any CSS transforms 
+    applied to a <code>&lt;model&gt;</code> element will be passed on the model,
+    allowing complex objects to be placed and maniplulated using just CSS.</p>
+
+  <div class="test test--1">
+    <div class="test__output">
+      <x-model class="model" src="../assets/models/LeePerrySmith.obj" style="max-width: 500px; max-height: 500px; animation: 5s spin-xyz linear infinite"></x-model>
+    </div>
+    <div class="test__info">
+      <pre class="code">
+&lt;style&gt;
+.model {
+  width: 50vw;
+  height: 50vw;
+  animation: 5s spin linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg);
+  }
+}
+&lt;style&gt;
+
+&lt;x-model class="model" src="../assets/models/LeePerrySmith.obj"&gt;&lt;/x-model&gt;
+      </pre>
+      <h2>TODO:</h2>
+      <ul>
+        <li>Workaround scrollTop issues in Safari</li>
+        <li>Support nested transforms</li>
+        <li>Calculate perspective from CSS value (it's hardcoded at the moment)</li>
+        <li>Honour perspective-origin</li>
+        <li>Performance!</li>
+      </ul>
+    </div>
+  </div>
+
+
+  <div class="test test--5">
+    <div class="test__info">
+      <h2>Translate test</h2>
+    </div>
+    <div class="test__output">
+      <x-model class="model model--abs" src="../assets/models/LeePerrySmith.obj" style="transform: translate3d(-50%, 0, 0)"></x-model>
+      <x-model class="model model--abs" src="../assets/models/LeePerrySmith.obj" style="transform: translate3d(-25%, 0, -400px)"></x-model>
+      <x-model class="model model--abs" src="../assets/models/LeePerrySmith.obj" style="transform: translate3d(0, 0, -800px)"></x-model>
+      <x-model class="model model--abs" src="../assets/models/LeePerrySmith.obj" style="transform: translate3d(25% ,0, -400px)"></x-model>
+      <x-model class="model model--abs" src="../assets/models/LeePerrySmith.obj" style="transform: translate3d(50%, 0, 0)"></x-model>
+    </div>
+  </div>
+
+  <div class="test">
+    <div class="test__info">
+      <h2>Rotate test</h2>
+    </div>
+    <div class="test__output">
+      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform: rotateX(45deg)"></x-model>
+      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform: rotateY(45deg)"></x-model>
+      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform: rotateZ(45deg)"></x-model>
+    </div>
+  </div>
+
+  <div class="test">
+    <div class="test__info">
+      <h2>Scale test</h2>
+    </div>
+    <div class="test__output">
+      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform: scale3d(.25,.25,.25)"></x-model>
+      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform: scale3d(1.25,1.25,1.25)"></x-model>
+      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform: scale3d(.5,.5,.5)"></x-model>
+    </div>
+  </div>
+
+  <div class="test">
+    <div class="test__info">
+      <h2>Animation test</h2>
+    </div>
+    <div class="test__output">
+      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="animation: 5s spin-x linear infinite"></x-model>
+      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="animation: 5s spin-y linear infinite"></x-model>
+      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="animation: 5s spin-z linear infinite"></x-model>
+      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="animation: 5s spin-xyz linear infinite"></x-model>
+    </div>
+  </div>
+
+  <div class="test">
+    <div class="test__info">
+      <h2>Nested transform test</h2>
+    </div>
+    <div class="test__output">
+      <div class="model-wrap" style="animation: 5s spin-x linear infinite">
+        <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="animation: 5s spin-y linear infinite"></x-model>
+      </div>
+    </div>
+  </div>
+
+  <div class="test test--8 test--fail">
+    <div class="test__info">
+      <h2>Nested transform test 2</h2>
+      <p>This test fails because elements aren't correctly aligned when using translate(-50%, -50%) to centre an object.</p>
+    </div>
+    <div class="test__output">
+      <div class="model-wrap" style="animation: 5s spin-xyz linear infinite">
+        <x-model class="model model--tiny" src="../assets/models/teapot.obj" style="transform: translate(-50%, -50%) translateZ(-20vmin)"></x-model>
+        <x-model class="model model--tiny" src="../assets/models/teapot.obj" style="transform: translate(-50%, -50%) translateZ(20vmin)"></x-model>
+        <x-model class="model model--tiny" src="../assets/models/teapot.obj" style="transform: translate(-50%, -50%) translateY(-20vmin)"></x-model>
+        <x-model class="model model--tiny" src="../assets/models/teapot.obj" style="transform: translate(-50%, -50%) translateY(20vmin)"></x-model>
+        <x-model class="model model--tiny" src="../assets/models/teapot.obj" style="transform: translate(-50%, -50%) translateX(-20vmin)"></x-model>
+        <x-model class="model model--tiny" src="../assets/models/teapot.obj" style="transform: translate(-50%, -50%) translateX(20vmin)"></x-model>
+      </div>
+    </div>
+  </div>
+
+  <div class="test test--9">
+    <div class="test__info">
+      <h2>Nested transform test 3</h2>
+      <p>This test uses a 4 nested elements, each with an animation. Negative margin values are used to center the model.</p>
+    </div>
+    <div class="test__output">
+      <div class="model-wrap" style="animation: 5s swing-x ease-in-out infinite alternate">
+        <div class="model-wrap" style="animation: 5s spin-x linear infinite">
+          <div class="model-wrap" style="animation: 5s spin-y linear infinite">
+              <div class="model-wrap" style="animation: 5s spin-z linear infinite">
+                <x-model class="model model--tiny model--abs" src="../assets/models/teapot.obj" style="transform: translateZ(-20vmin)"></x-model>
+                <x-model class="model model--tiny model--abs" src="../assets/models/teapot.obj" style="transform: translateZ(20vmin)"></x-model>
+                <x-model class="model model--tiny model--abs" src="../assets/models/teapot.obj" style="transform: translateY(-20vmin)"></x-model>
+                <x-model class="model model--tiny model--abs" src="../assets/models/teapot.obj" style="transform: translateY(20vmin)"></x-model>
+                <x-model class="model model--tiny model--abs" src="../assets/models/teapot.obj" style="transform: translateX(-20vmin)"></x-model>
+                <x-model class="model model--tiny model--abs" src="../assets/models/teapot.obj" style="transform: translateX(20vmin)"></x-model>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="test test--2">
+    <div class="test__info">
+      <h2>Perspective test</h2>
+    </div>
+    <div class="test__output">
+      <x-model class="model model--small model--spaced" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/teapot.obj"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/teapot.obj"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/teapot.obj"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/teapot.obj"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/LeePerrySmith.obj"></x-model>
+    </div>
+  </div>
+
+  <div class="test test--4">
+    <div class="test__info">
+      <h2>Perspective scrolling test</h2>
+      <p>Scroll horizontally</p>
+    </div>
+    <div class="test__output">
+      <x-model class="model model--spaced  model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <x-model class="model model--spaced  model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <x-model class="model model--spaced  model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <x-model class="model model--spaced  model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <x-model class="model model--spaced  model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <x-model class="model model--spaced  model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
+    </div>
+  </div>
+
+  <div class="test test--6">
+    <div class="test__info">
+      <h2>State test (:hover)</h2>
+    </div>
+    <div class="test__output">
+      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
+    </div>
+  </div>
+
+  <div class="panel panel--about">
+    <p><cite>HTML model element: Test page. Please see <a href="https://github.com/keithclark/3d-model-element">github</a> for more information.</cite></p>
+  </div>
+
+  <script src="../assets/js/vendor/custom-element-polyfill.min.js"></script>
+  <script src="../assets/js/vendor/three.min.js"></script>
+  <script src="../assets/js/vendor/three-obj-loader.min.js"></script>
+  <script src="../../src/model-element.js"></script>
+</body>
+</html>

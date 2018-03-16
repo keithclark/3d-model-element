@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3D model custom element first person demo</title>
+<link rel="stylesheet" href="css.css">
+</head>
+<body>
+  <div class="obj3d" id="scene">
+    <div class="obj3d room" id="room">
+      <x-model class="obj3d model" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <div class="obj3d room__floor"></div>
+    </div>
+  </div>
+  <div class="panel panel--help">
+    Use mouse to look and
+      <kbd class="key">W</kbd>
+      <kbd class="key">A</kbd>
+      <kbd class="key">S</kbd>
+      <kbd class="key">D</kbd>
+    to move
+  </div>
+  <div class="panel panel--about">
+    <cite>HTML model element: 3D Scene demo. Please see <a href="https://github.com/keithclark/3d-model-element">github</a> for more information.</cite>
+  </div>
+  <script src="../assets/js/vendor/custom-element-polyfill.min.js"></script>
+  <script src="../assets/js/vendor/three.min.js"></script>
+  <script src="../assets/js/vendor/three-obj-loader.min.js"></script>
+  <script src="../../src/model-element.js"></script>
+  <script src="demo.js"></script>
+</body>
+</html>
