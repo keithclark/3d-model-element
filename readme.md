@@ -1,6 +1,6 @@
 # 3D model custom element
 
-This is a experimental custom element that allows 3D objects (.obj format) to be loaded into a document and rendered inline, just like any other external resource. Additionally, any CSS transforms applied to a model element will be applied on the 3D object, allowing complex objects to be placed and maniplulated using just CSS.
+This is a experimental custom element that allows 3D objects (.obj format) to be loaded into a document and rendered inline, just like any other external resource. Additionally, any CSS transforms applied to a model element will be passed on to the 3D object, allowing complex objects to be placed and maniplulated using just CSS.
 
 ![Screengrab of transformed models](https://github.com/keithclark/3d-model-element/blob/master/preview.png?raw=true)
 
@@ -22,7 +22,7 @@ This is a experimental custom element that allows 3D objects (.obj format) to be
 
 ## Getting started
 
-To use this custom element you'll need to include the [three.js](https://threejs.org/) library, its accompanying [OBJ loader](https://github.com/mrdoob/three.js/blob/master/examples/js/loaders/OBJLoader.js) and the [custom element script](https://github.com/keithclark/model-element/src/model-element.js):
+To use this custom element you'll need to include the [three.js](https://threejs.org/) library, its accompanying [OBJ loader](https://github.com/mrdoob/three.js/blob/master/examples/js/loaders/OBJLoader.js) and the [custom element script](https://github.com/keithclark/3d-model-element/blob/master/src/model-element.js):
 
 ```html
 <script src="js/three.min.js"></script>
@@ -88,6 +88,6 @@ _Note: It's perfectly valid to nest perspective rules in CSS. However, models wi
 
 The model-element script creates a camera, scene, light source and a WebGL renderer. The DOM node returned by the renderer (a `<canvas>` element) is added to the document and configured to fill the viewport and sit above all other content. Additionally, `pointer-events: none` is set, allowing elements below to be interacted with.
 
-Adding `<x-model>` elements to the DOM results in the model being loaded and added to the underling scene. Removing an element, removes it from the scene.
+Adding `<x-model>` elements to the DOM results in the model being loaded and added to the underling scene. Removing an element from the DOM will remove it from the scene.
 
 The scene is re-rendered every frame. For each object in the scene, the renderer finds it's host node and walks up the DOM treem resolving any transforms, positions and scroll offsets (this is only partially implemented at the moment). The resulting transform matrix is then applied to the object in the scene. Once all objects are updated, the renderer repaints the scene to the layer, in perfect sync with the underlying DOM nodes.
