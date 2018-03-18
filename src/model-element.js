@@ -7,6 +7,9 @@
 
 (() => {
 
+  const RENDER_OBJECT_BOUNDING_BOX = false;
+
+
   // If this browser doesn't support custom elements bail out now
   if (!('customElements' in window)) {
     return;
@@ -309,6 +312,15 @@
           obj.position.multiplyScalar(-scale);
           obj.scale.set(scale, scale, scale);
           pivot.add(obj);
+
+          if (RENDER_OBJECT_BOUNDING_BOX) {
+            let material = new THREE.LineBasicMaterial({color: 0x00ff00});
+            let geometry = new THREE.PlaneGeometry(size.x, size.y);
+            let wireframe = new THREE.WireframeGeometry(geometry);
+            let line = new THREE.LineSegments(wireframe, material);
+            line.scale.set(scale, scale, scale);
+            pivot.add(line);
+          }
 
           // TODO: refactor (see: disconnectedCallback)
           let i = scene.children.find(obj => obj.elem === this);
