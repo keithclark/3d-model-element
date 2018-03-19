@@ -103,10 +103,10 @@
         camera.aspect = overlayWidth / overlayHeight;
         camera.position.set(0, 0, perspective);
       } else {
-        camera.left = overlayWidth / - 2;
+        camera.left = overlayWidth / -2;
         camera.right = overlayWidth / 2;
         camera.top = overlayHeight / 2;
-        camera.bottom = overlayHeight / - 2;
+        camera.bottom = overlayHeight / -2;
         camera.far = 15000;
         camera.near = -700;
       }
@@ -117,6 +117,7 @@
       renderer.setSize(overlayWidth, overlayHeight);
       renderer.render(scene, camera);
     }
+
   }
 
   /**
@@ -129,8 +130,11 @@
     let b = new THREE.Quaternion()
     let c = new THREE.Vector3()
     let m1 = new THREE.Matrix4();
-    let m2 = new THREE.Matrix4();
-    let targetElem = osParent = elem;
+    let transformMatrix = new THREE.Matrix4();
+    let transformOrigin = new THREE.Vector3();
+    let transformOriginMatrix = new THREE.Matrix4();
+    let targetElem = elem;
+    let osParent = elem;
     let stack = [];
     let posX = 0, posY = 0;
     let perspective = 0;
@@ -157,6 +161,11 @@
       elem = elem.parentElement;
     }
 
+    posX -= targetElem.offsetWidth / 2;
+    posY += targetElem.offsetHeight / 2;
+
+    m1.makeTranslation(posX, -posY, 0);
+
     // Now we can resolve transforms.
     while (elem = stack.pop()) {
 
@@ -167,34 +176,20 @@
       // the last value found.
       let perspectiveValue = style.perspective;
       if (perspectiveValue !== 'none') {
-        perspective = parseFloat(perspectiveValue);
+        perspective = parseCssUnitValue(perspectiveValue);
       }
 
-      let cssMatrix = parseCssTransformMatrix(style.transform);
-      m2.set(
-        cssMatrix.m11, cssMatrix.m12, cssMatrix.m13, cssMatrix.m14,
-        cssMatrix.m21, cssMatrix.m22, cssMatrix.m23, cssMatrix.m24,
-        cssMatrix.m31, cssMatrix.m32, cssMatrix.m33, cssMatrix.m34,
-        cssMatrix.m41, cssMatrix.m42, cssMatrix.m43, cssMatrix.m44
-      );
+      parseCssOriginValue(style.transformOrigin, transformOrigin);
+      parseCssTransformValue(style.transform, transformMatrix);
 
-      // The sign of the Y rotation needs to be flipped. At the time of writing,
-      // I could only acheive this by decomposing the matrix, flipping the
-      // rotation sign and re-composing it.
-      m2.decompose(a, b, c);
-      b.y *= -1;
-      a.x += cssMatrix.m41;
-      a.y -= cssMatrix.m42;
-      a.z += cssMatrix.m43;
-      m2.compose(a, b, c);
+      let ox = transformOrigin.x - elem.offsetWidth / 2;
+      let oy = transformOrigin.y - elem.offsetHeight / 2;
+      let oz = transformOrigin.z;
 
-      // apply the matrix
-      m1.multiply(m2);
+      m1.multiply(transformOriginMatrix.makeTranslation(ox, -oy, oz));
+      m1.multiply(transformMatrix);
+      m1.multiply(transformOriginMatrix.makeTranslation(-ox, oy, -oz));
     }
-
-
-    m1.elements[12] += posX - targetElem.offsetWidth / 2;
-    m1.elements[13] -= posY + targetElem.offsetHeight / 2;
 
     return {
       matrix: m1,
@@ -204,42 +199,59 @@
 
 
   /**
-   * Parses a matrix string and returns a 4x4 matrix
+   * Strips the unit from a value (i.e. 100.55px) and converts the remaining
+   * value to a number.
+   */
+  const parseCssUnitValue = value => {
+    return parseFloat(value || 0);
+  }
+
+
+  /**
+   * Parses a CSS origin string (`perspective-origin`, `transform-origin`) into
+   * it's X, Y and Z components and populates the supplied THREE.Vector3 with
+   * the result.
+   */
+  const parseCssOriginValue = (originString, vec3) => {
+    let transformOrigin = originString.split(' ');
+    vec3.set(
+      parseCssUnitValue(transformOrigin[0]),
+      parseCssUnitValue(transformOrigin[1]),
+      parseCssUnitValue(transformOrigin[2])
+    );
+  }
+
+
+  /**
+   * Parses a CSS 3x3 or 4x4 matrix string into its compontents and populates 
+   * the passed THREE.Matrix4 with the result.
    * 
    * (https://keithclark.co.uk/articles/calculating-element-vertex-data-from-css-transforms/)
    */
 
-  const parseCssTransformMatrix = matrixString => {
-    var c = (matrixString||'').split(/\s*[(),]\s*/).slice(1,-1),
-        matrix;
+  const parseCssTransformValue = (matrixString, mat4) => {
+    var c = matrixString.split(/\s*[(),]\s*/).slice(1, -1);
 
     if (c.length === 6) {
-        // 'matrix()' (3x2)
-        matrix = {
-            m11: +c[0], m21: +c[2], m31: 0, m41: +c[4],
-            m12: +c[1], m22: +c[3], m32: 0, m42: +c[5],
-            m13: 0,     m23: 0,     m33: 1, m43: 0,
-            m14: 0,     m24: 0,     m34: 0, m44: 1
-        };
-    } else if (c.length === 16) {
-        // matrix3d() (4x4)
-        matrix = {
-            m11: +c[0], m21: +c[4], m31: +c[8], m41: +c[12],
-            m12: +c[1], m22: +c[5], m32: +c[9], m42: +c[13],
-            m13: +c[2], m23: +c[6], m33: +c[10], m43: +c[14],
-            m14: +c[3], m24: +c[7], m34: +c[11], m44: +c[15]
-        };
-
+      // 'matrix()' (3x2)
+      mat4.set(
+        +c[0], -c[2],      0,  +c[4],
+        -c[1], +c[3],      0,  -c[5],
+            0,     0,      1,      0,
+            0,     0,      0,      1
+      );
+    } else if (c.length === 16) { 
+      // matrix3d() (4x4)
+      mat4.set(
+        +c[0], -c[4],  +c[8], +c[12],
+        -c[1], +c[5],  -c[9], +c[13],
+        +c[2], -c[6], +c[10], +c[14],
+        +c[3], +c[7], +c[11], +c[15]
+      );
     } else {
-        // handle 'none' or invalid values.
-        matrix = {
-            m11: 1, m21: 0, m31: 0, m41: 0,
-            m12: 0, m22: 1, m32: 0, m42: 0,
-            m13: 0, m23: 0, m33: 1, m43: 0,
-            m14: 0, m24: 0, m34: 0, m44: 1
-        };
+      // handle 'none' or invalid values.
+      mat4.identity();
     }
-    return matrix;
   };
 
 
