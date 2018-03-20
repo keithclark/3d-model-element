@@ -15,7 +15,6 @@ This is a experimental custom element that allows 3D objects (.obj format) to be
 
 * Only supports then `.obj` model file format - other loaders will be added in the future.
 * At the moment Safari doesn't scroll models because of a bug with `scrollTop`.
-* `perspective-origin` isn't supported yet.
 * `transform-style: flat` isn't supported yet.
 
 
