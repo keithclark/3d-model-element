@@ -46,9 +46,12 @@
     requestAnimationFrame(render);
 
     let perspective;
+    let perspectiveOrigin;
     let camera;
     let overlayWidth = window.innerWidth;
     let overlayHeight = window.innerHeight;
+    let halfOverlayWidth = overlayWidth / 2;
+    let halfOverlayHeight = overlayHeight / 2;
     let needsRender = false;
 
     // Walk over each object and update it
@@ -57,7 +60,7 @@
       if (elem) {
 
         let width = elem.offsetWidth;
-        
+
         let transform = getTransformForElement(elem);
 
         // If we haven't yet figured out which type of camera to use for
@@ -67,6 +70,7 @@
           if (transform.perspective) {
             camera = perspectiveCamera;
             perspective = transform.perspective;
+            perspectiveOrigin = transform.perspectiveOrigin;
           } else {
             camera = orthographicCamera;
           }
@@ -84,8 +88,8 @@
         // Three's coordinate space uses 0,0,0 as the screen centre so we need
         // to adjust the computed X/Y position back to the top-left of the
         // screen to match the CSS rendering position.
-        child.position.x += width - overlayWidth / 2;
-        child.position.y += overlayHeight / 2;
+        child.position.x += width - halfOverlayWidth;
+        child.position.y += halfOverlayHeight;
       }
 
       // TODO: determine if this object is visible the viewport and set the
@@ -99,19 +103,47 @@
     // set the camera properties and fire up the renderer...
     if (camera && needsRender) {
       if (camera.isPerspectiveCamera) {
-        camera.fov = 180 * (2 * Math.atan(overlayHeight / 2 / perspective)) / Math.PI;
+        camera.fov = 180 * (2 * Math.atan(halfOverlayHeight / perspective)) / Math.PI;
         camera.aspect = overlayWidth / overlayHeight;
         camera.position.set(0, 0, perspective);
+        camera.updateProjectionMatrix();
+
+        // Add perspective-origin
+        let originX = halfOverlayWidth - perspectiveOrigin.x;
+        let originY = halfOverlayHeight - perspectiveOrigin.y;
+
+        // The default is origin for perspective is `50% 50%`, which equates to
+        // `0,0`. If the author hasn't specified a different value we don't need
+        // to make any adjustments to the projection matrix
+        if (originX !==0 || originY !== 0) {
+
+          // copy the projection matrix
+          let tmpMatrix = camera.projectionMatrix.clone();
+
+          // set the camera projection matrix to the origin
+          camera.projectionMatrix.makeTranslation(
+            -originX / halfOverlayWidth,
+            originY / halfOverlayHeight,
+            0
+          );
+
+          // apply to original camera projection matrix
+          camera.projectionMatrix.multiply(tmpMatrix);
+
+          // remove the origin offset
+          tmpMatrix.makeTranslation(originX, -originY, 0);
+          camera.projectionMatrix.multiply(tmpMatrix);
+        }
+
       } else {
-        camera.left = overlayWidth / -2;
-        camera.right = overlayWidth / 2;
-        camera.top = overlayHeight / 2;
-        camera.bottom = overlayHeight / -2;
+        camera.left = -halfOverlayWidth;
+        camera.right = halfOverlayWidth;
+        camera.top = halfOverlayHeight;
+        camera.bottom = -halfOverlayHeight;
         camera.far = 15000;
         camera.near = -700;
+        camera.updateProjectionMatrix();
       }
-
-      camera.updateProjectionMatrix();
 
       // render the scene
       renderer.setSize(overlayWidth, overlayHeight);
@@ -126,17 +158,16 @@
    */
 
   const getTransformForElement = elem => {
-    let a = new THREE.Vector3()
-    let b = new THREE.Quaternion()
-    let c = new THREE.Vector3()
     let m1 = new THREE.Matrix4();
     let transformMatrix = new THREE.Matrix4();
     let transformOrigin = new THREE.Vector3();
     let transformOriginMatrix = new THREE.Matrix4();
+    let perspectiveOrigin = new THREE.Vector3();
     let targetElem = elem;
     let osParent = elem;
     let stack = [];
-    let posX = 0, posY = 0;
+    let posX = 0;
+    let posY = 0;
     let perspective = 0;
 
     // if this element doesn't have a width or height bail out now.
@@ -177,6 +208,14 @@
       let perspectiveValue = style.perspective;
       if (perspectiveValue !== 'none') {
         perspective = parseCssUnitValue(perspectiveValue);
+
+        // TODO: strictly speaking, `perspective-origin` can be set on any
+        // element, not just the one that has `perspective`. Research the impact
+        // of setting perspective-origin on different elements in the DOM tree.
+        let perspectiveOriginValue = style.perspectiveOrigin;
+        if (perspectiveOriginValue) {
+          parseCssOriginValue(perspectiveOriginValue, perspectiveOrigin);
+        }
       }
 
       parseCssOriginValue(style.transformOrigin, transformOrigin);
@@ -186,14 +225,23 @@
       let oy = transformOrigin.y - elem.offsetHeight / 2;
       let oz = transformOrigin.z;
 
-      m1.multiply(transformOriginMatrix.makeTranslation(ox, -oy, oz));
-      m1.multiply(transformMatrix);
-      m1.multiply(transformOriginMatrix.makeTranslation(-ox, oy, -oz));
+      // If the computed `transform-origin` is a value other than `50% 50% 0`
+      // (`0,0,0` in THREE coordinate space) then we need to translate by the
+      // origin before multiplying the element's transform matrix. Finally, we
+      // need undo the translation.
+      if (ox !==0 || oy !==0 || oz !== 0) {
+        m1.multiply(transformOriginMatrix.makeTranslation(ox, -oy, oz));
+        m1.multiply(transformMatrix);
+        m1.multiply(transformOriginMatrix.makeTranslation(-ox, oy, -oz));
+      } else {
+        m1.multiply(transformMatrix);
+      }
     }
 
     return {
       matrix: m1,
-      perspective: perspective
+      perspective: perspective,
+      perspectiveOrigin: perspectiveOrigin
     };
   }
 
