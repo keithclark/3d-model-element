@@ -94,6 +94,14 @@ const getTransformForElement = elem => {
 }
 
 
+const createStylesheet = cssText => {
+  let styleElem = document.createElement('style');
+  styleElem.textContent = cssText;
+  return styleElem;
+}
+
+
 export default {
-  getTransformForElement
+  getTransformForElement,
+  createStylesheet
 }
