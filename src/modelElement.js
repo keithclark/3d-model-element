@@ -39,8 +39,13 @@ export default class extends HTMLElement {
       this.disconnectedCallback();
 
       modelLoader.load(newValue).then(obj => {
+        let event = new UIEvent('load');
+        this.dispatchEvent(event);
         objects.set(this, obj);
         this.connectedCallback();
+      }).catch(e => {
+        let event = new UIEvent('error');
+        this.dispatchEvent(event);
       });
     }
   }
