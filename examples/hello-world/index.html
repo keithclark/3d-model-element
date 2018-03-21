@@ -6,10 +6,6 @@
 <title>HTML custom element for displaying 3D models: Hello World</title>
 <style>
 .model { 
-  width: 100vmin;
-  height: 100vmin;
-  max-width: 500px;
-  max-height: 500px;
   animation: spin 10s linear infinite;
  }
 
@@ -22,7 +18,7 @@
 </head>
 <body>
   <h1>Model custom element: Hello world</h1>
-  <x-model class="model" src="../assets/models/LeePerrySmith.obj"></x-model>
+  <x-model class="model" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
   <p>If everything worked OK, there should be a rotating 3D model above.</p>
 
   <div class="panel panel--about">
@@ -31,7 +27,7 @@
 
   <script src="../assets/js/vendor/custom-element-polyfill.min.js"></script>
   <script src="../assets/js/vendor/three.min.js"></script>
-  <script src="../assets/js/vendor/three-obj-loader.min.js"></script>
+  <script src="../assets/js/vendor/three-gltf-loader.min.js"></script>
   <script src="../../dist/model-element.min.js"></script>
 </body>
 </html>
