@@ -172,7 +172,7 @@
 
   <div class="test test--1">
     <div class="test__output">
-      <x-model class="model" src="../assets/models/LeePerrySmith.obj" style="max-width: 500px; max-height: 500px; animation: 5s spin-xyz linear infinite"></x-model>
+      <x-model class="model" src="../assets/models/gltf/duck/Duck.gltf" style="max-width: 500px; max-height: 500px; animation: 5s spin-xyz linear infinite"></x-model>
     </div>
     <div class="test__info">
       <pre class="code">
@@ -195,6 +195,16 @@
     </div>
   </div>
 
+
+  <div class="test">
+    <div class="test__info">
+      <h2>Object loader test</h2>
+    </div>
+    <div class="test__output">
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
+      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
+    </div>
+  </div>
 
   <div class="test test--5">
     <div class="test__info">
@@ -353,6 +363,7 @@
   <script src="../assets/js/vendor/custom-element-polyfill.min.js"></script>
   <script src="../assets/js/vendor/three.min.js"></script>
   <script src="../assets/js/vendor/three-obj-loader.min.js"></script>
+  <script src="../assets/js/vendor/three-gltf-loader.min.js"></script>
   <script src="../../dist/model-element.min.js"></script>
 </body>
 </html>

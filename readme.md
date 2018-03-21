@@ -1,6 +1,6 @@
 # 3D model custom element
 
-This is a experimental custom element that allows 3D objects (.obj format) to be loaded into a document and rendered inline, just like any other external resource. Additionally, any CSS transforms applied to a model element will be passed on to the 3D object, allowing complex objects to be placed and maniplulated using just CSS.
+This is a experimental custom element that allows 3D objects (currently, OBJ and gLTF format) to be loaded into a document and rendered inline, just like any other external resource. Additionally, any CSS transforms applied to the element will be passed on to the 3D model, allowing complex objects to be placed and maniplulated using just CSS.
 
 ![Screengrab of transformed models](https://github.com/keithclark/3d-model-element/blob/master/preview.png?raw=true)
 
@@ -13,19 +13,20 @@ This is a experimental custom element that allows 3D objects (.obj format) to be
 
 ## Limitations
 
-* Only supports then `.obj` model file format - other loaders will be added in the future.
+* Support for the `.gltf` and `.obj` model file formats - other loaders will be added in the future.
+* File format is currently determined by file extension (.obj for OBJ and .gltf for gLTF).
 * At the moment Safari doesn't scroll models because of a bug with `scrollTop`.
 * `transform-style: flat` isn't supported yet.
 
 
 ## Getting started
 
-To use this custom element you'll need to include the [three.js](https://threejs.org/) library, its accompanying [OBJ loader](https://github.com/mrdoob/three.js/blob/master/examples/js/loaders/OBJLoader.js) and the [custom element script](https://github.com/keithclark/3d-model-element/blob/master/src/model-element.js):
+To use this custom element you'll need to include the [three.js](https://threejs.org/) library, its accompanying [OBJ loader](https://github.com/mrdoob/three.js/blob/master/examples/js/loaders/OBJLoader.js) and/or [gLTF loader](https://github.com/mrdoob/three.js/blob/master/examples/js/loaders/GLTFLoader.js) along with the [custom element script](https://github.com/keithclark/3d-model-element/blob/master/dist/model-element.min.js):
 
 ```html
 <script src="js/three.min.js"></script>
 <script src="js/three-obj-loader.js"></script>
-<script src="js/model-element.js"></script>
+<script src="js/model-element.min.js"></script>
 ```
 
 To bolster up browser support, you can also include a [web components polyfill](https://github.com/WebComponents/webcomponentsjs).
@@ -55,8 +56,8 @@ Here's a cut-and-paste example:
   <x-model class="model" src="/path/to/my-model.obj"></x-model>
 
   <script src="js/three.min.js"></script>
-  <script src="js/three-obj-loader.js"></script>
-  <script src="js/model-element.js"></script>
+  <script src="js/three-obj-loader.min.js"></script>
+  <script src="js/model-element.min.js"></script>
 </body>
 </html>
 ```
