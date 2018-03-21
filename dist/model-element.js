@@ -1,6 +1,9 @@
 (function () {
   'use strict';
 
+  /* While mapping objects to a DOM element, it's useful to have a bounding box
+  to reference. Enabling this flag will produce just that, a 2D bounding rect
+  that should match the related DOM element */
   const RENDER_OBJECT_BOUNDING_BOX = false;
 
 
@@ -75,13 +78,13 @@
     let object;
     let ext = urlUtils.getFileExtension(src);
 
-    if (!ext) {
-      throw 'Unknown object format';
+    if (ext) {
+      loader = loaders[ext];
     }
 
-    loader = loaders[ext];
     if (!loader) {
-      throw `Unknown object format '${ext}'`;
+      console.error(`Couldn't load "${src}". Unknown object format "${ext}"`);
+      return Promise.reject();
     }
 
     object = loader.objectCache[src];
@@ -263,8 +266,16 @@
   };
 
 
+  const createStylesheet = cssText => {
+    let styleElem = document.createElement('style');
+    styleElem.textContent = cssText;
+    return styleElem;
+  };
+
+
   var domUtils = {
-    getTransformForElement
+    getTransformForElement,
+    createStylesheet
   }
 
   let camera;
@@ -278,6 +289,9 @@
 
 
   const init = () => {
+    if (scene) {
+      return false;
+    }
 
     // create the scene
     scene = new THREE.Scene();
@@ -293,16 +307,13 @@
       alpha: true
     });
 
-    renderer.domElement.style.cssText = 'pointer-events:none;position:fixed;top:0;left:0;';
-    document.documentElement.appendChild(renderer.domElement);
+    requestAnimationFrame(render);
+
+    return renderer.domElement;
   };
 
 
   const add = obj => {
-    if (!scene) {
-      init();
-      requestAnimationFrame(render);
-    }
     scene.add(obj);
   };
 
@@ -344,8 +355,10 @@
         child.scale.setFromMatrixScale(transform.matrix);
 
         // Objects are normalised so we can scale them up by their width to
-        // render them at the intended size
-        child.scale.multiplyScalar(width);
+        // render them at the intended size. Scaling by a factor of `0` causes
+        // problems with inverting matrix because the determinant will be 0 so
+        // we use a default of `1`.
+        child.scale.multiplyScalar(width || 1);
 
         // Three's coordinate space uses 0,0,0 as the screen centre so we need
         // to adjust the computed X/Y position back to the top-left of the
@@ -360,7 +373,7 @@
       }
     });
 
-    return needsRender;
+    return camera && needsRender;
   };
 
 
@@ -436,10 +449,46 @@
 
 
   var modelLayer = {
+    init,
     add,
     remove,
     render
   }
+
+  const objects = new WeakMap();
+
+  const ELEMENT_DEFAULT_STYLES =
+    '#x-model-renderLayer{' +
+      'position:fixed;' +
+      'top:0;' +
+      'left:0;' +
+      'pointer-events:none' +
+    '}' +
+    'x-model{' +
+      'display:inline-block;' +
+      'width:250px;' +
+      'height:250px' +
+    '}';
+
+  let styleElem;
+
+
+  const initModelLayer = () => {
+    // The first time an element is added to the document we inject a
+    // stylesheet that contains its default styles. Ideally this would be
+    // appended to the shadow DOM, but support for that isn't great right now.
+    styleElem = domUtils.createStylesheet(ELEMENT_DEFAULT_STYLES);
+    let head = document.documentElement.firstChild;
+    head.insertBefore(styleElem, head.firstChild);
+
+    // Initialize the model layer and append the resulting DOM node to the
+    // document root - outside the <body> to prevent perspective or transform
+    // styles from affecting it.
+    let renderDomElement = modelLayer.init();
+    renderDomElement.setAttribute('id', 'x-model-renderLayer');
+    document.documentElement.appendChild(renderDomElement);
+  };
+
 
   class HTMLModelElement extends HTMLElement {
 
@@ -452,17 +501,40 @@
     }
 
     connectedCallback() {
+      if (!styleElem) {
+        initModelLayer();
+      }
 
+      let obj = objects.get(this);
+      if (obj && obj.elem !== this) {
+        obj.elem = this;
+        modelLayer.add(obj);
+      }
     }
 
     disconnectedCallback() {
+      let obj = objects.get(this);
+      if (obj && obj.elem === this) {
+        modelLayer.remove(obj);
+        obj.elem = null;
+      }
     }
 
     attributeChangedCallback(attribute, oldValue, newValue) {
       if (attribute === 'src') {
+
+        // call the disconnected callback handler to release the current model if
+        // one is attached
+        this.disconnectedCallback();
+
         modelLoader.load(newValue).then(obj => {
-          obj.elem = this;
-          modelLayer.add(obj);
+          let event = new UIEvent('load');
+          this.dispatchEvent(event);
+          objects.set(this, obj);
+          this.connectedCallback();
+        }).catch(e => {
+          let event = new UIEvent('error');
+          this.dispatchEvent(event);
         });
       }
     }
@@ -471,14 +543,49 @@
 
   let loader;
 
-  var objLoader = src => {
+
+  var gltfLoader = src => {
+
     return new Promise((resolve, reject) => {
+
+      const loadHandler = gltf => {
+        resolve(gltf.scene);
+      };
+
+      const errorHandler = () => {
+        reject();
+      };
+
       if (!loader) {
-        loader = new THREE.OBJLoader();
+        loader = new THREE.GLTFLoader();
       }
-      return loader.load(src, obj => {
+
+      return loader.load(src, loadHandler, null, errorHandler);
+
+    });
+  }
+
+  let loader$1;
+
+
+  var objLoader = src => {
+
+    return new Promise((resolve, reject) => {
+
+      const loadHandler = obj => {
         resolve(obj);
-      });
+      };
+
+      const errorHandler = () => {
+        reject();
+      };
+
+      if (!loader$1) {
+        loader$1 = new THREE.OBJLoader();
+      }
+
+      return loader$1.load(src, loadHandler, null, errorHandler);
+
     });
   }
 
@@ -486,6 +593,10 @@
 
     if (!('THREE' in window)) {
       throw 'THREE (threejs.org) is required.';
+    }
+
+    if ('GLTFLoader' in THREE) {
+      modelLoader.register('.gltf', gltfLoader);
     }
 
     if ('OBJLoader' in THREE) {
