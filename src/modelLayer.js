@@ -12,6 +12,9 @@ let light;
 
 
 const init = () => {
+  if (scene) {
+    return false;
+  }
 
   // create the scene
   scene = new THREE.Scene();
@@ -27,16 +30,13 @@ const init = () => {
     alpha: true
   });
 
-  renderer.domElement.style.cssText = 'pointer-events:none;position:fixed;top:0;left:0;';
-  document.documentElement.appendChild(renderer.domElement);
+  requestAnimationFrame(render);
+
+  return renderer.domElement;
 }
 
 
 const add = obj => {
-  if (!scene) {
-    init();
-    requestAnimationFrame(render);
-  }
   scene.add(obj);
 }
 
@@ -97,7 +97,7 @@ const update = () => {
     }
   });
 
-  return needsRender;
+  return camera && needsRender;
 }
 
 
@@ -176,6 +176,7 @@ const render = () => {
 
 
 export default {
+  init,
   add,
   remove,
   render
