@@ -78,8 +78,10 @@ const update = () => {
       child.scale.setFromMatrixScale(transform.matrix);
 
       // Objects are normalised so we can scale them up by their width to
-      // render them at the intended size
-      child.scale.multiplyScalar(width);
+      // render them at the intended size. Scaling by a factor of `0` causes
+      // problems with inverting matrix because the determinant will be 0 so
+      // we use a default of `1`.
+      child.scale.multiplyScalar(width || 1);
 
       // Three's coordinate space uses 0,0,0 as the screen centre so we need
       // to adjust the computed X/Y position back to the top-left of the
