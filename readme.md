@@ -89,3 +89,25 @@ The model-element script creates a camera, scene, light source and a WebGL rende
 Adding `<x-model>` elements to the DOM results in the model being loaded and added to the underling scene. Removing an element from the DOM will remove it from the scene.
 
 The scene is re-rendered every frame. For each object in the scene, the renderer finds it's host node and walks up the DOM treem resolving any transforms, positions and scroll offsets (this is only partially implemented at the moment). The resulting transform matrix is then applied to the object in the scene. Once all objects are updated, the renderer repaints the scene to the layer, in perfect sync with the underlying DOM nodes.
+
+
+---
+
+# Contributing
+
+## Requirements
+
+* Node / NPM
+
+
+## Setup
+
+1) Clone this repo.
+2) Install dependencies: `npm install`
+3) Build the project with the watch task: `npm start dev`
+4) Start editing...
+
+
+## Other build options
+
+* `npm start dist` - builds the both the unminified and minified distribution files to the `/dist/` folder.
