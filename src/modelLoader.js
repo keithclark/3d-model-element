@@ -18,13 +18,13 @@ const load = src => {
   let object;
   let ext = urlUtils.getFileExtension(src);
 
-  if (!ext) {
-    throw 'Unknown object format';
+  if (ext) {
+    loader = loaders[ext];
   }
 
-  loader = loaders[ext];
   if (!loader) {
-    throw `Unknown object format '${ext}'`;
+    console.error(`Couldn't load "${src}". Unknown object format "${ext}"`);
+    return Promise.reject();
   }
 
   object = loader.objectCache[src];
