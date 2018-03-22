@@ -13,8 +13,8 @@ This is a experimental custom element that allows 3D objects (currently, OBJ and
 
 ## Limitations
 
-* Support for the `.gltf` and `.obj` model file formats - other loaders will be added in the future.
-* File format is currently determined by file extension (.obj for OBJ and .gltf for gLTF).
+* Support for the gLTF and OBJ model formats - other formats will be added in the future.
+* File format is currently determined by file extension (`.obj` for OBJ and `.gltf`/`.glb` for gLTF).
 * At the moment Safari doesn't scroll models because of a bug with `scrollTop`.
 * `transform-style: flat` isn't supported yet.
 
@@ -89,7 +89,7 @@ The model-element script creates a camera, scene, light source and a WebGL rende
 
 Adding `<x-model>` elements to the DOM results in the model being loaded and added to the underling scene. Removing an element from the DOM will remove it from the scene.
 
-The scene is re-rendered every frame. For each object in the scene, the renderer finds it's host node and walks up the DOM treem resolving any transforms, positions and scroll offsets (this is only partially implemented at the moment). The resulting transform matrix is then applied to the object in the scene. Once all objects are updated, the renderer repaints the scene to the layer, in perfect sync with the underlying DOM nodes.
+The scene is re-rendered every frame. For each object in the scene, the renderer finds it's host node and walks up the DOM tree resolving any transforms, positions and scroll offsets. The resulting transform matrix is then applied to the object in the scene. Once all objects are updated the renderer repaints the scene to the layer. Objects now appear on-screen, synchronised with their host DOM node.
 
 
 ---
