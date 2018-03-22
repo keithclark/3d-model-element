@@ -8,8 +8,10 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "rollup -f iife -i src/index.js -o dist/model-element.js -w",
-    "dist": "rollup -f iife -i src/index.js | minify --out-file dist/model-element.min.js"
+    "dev": "rollup -f iife -m -i src/index.js -o dist/model-element.js -w",
+    "build": "rollup -f iife -m -i src/index.js -o dist/model-element.js",
+    "minify": "minify dist/model-element.js | cat src/banner.js - > dist/model-element.min.js",
+    "dist": "npm run build && npm run minify"
   },
   "repository": {
     "type": "git",

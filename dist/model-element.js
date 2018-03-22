@@ -608,3 +608,4 @@
   }
 
 }());
+//# sourceMappingURL=model-element.js.map
