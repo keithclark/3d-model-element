@@ -12,6 +12,7 @@ if ('customElements' in window) {
 
   if ('GLTFLoader' in THREE) {
     modelLoader.register('.gltf', gltfLoader);
+    modelLoader.register('.glb', gltfLoader);
   }
 
   if ('OBJLoader' in THREE) {
