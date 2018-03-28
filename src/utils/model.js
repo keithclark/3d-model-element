@@ -1,7 +1,7 @@
 /* While mapping objects to a DOM element, it's useful to have a bounding box
 to reference. Enabling this flag will produce just that, a 2D bounding rect
 that should match the related DOM element */
-const RENDER_OBJECT_BOUNDING_BOX = false;
+const RENDER_OBJECT_BOUNDING_BOX = true;
 
 
 const normalize = obj => {

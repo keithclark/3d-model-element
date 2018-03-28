@@ -30,14 +30,18 @@ const init = () => {
     alpha: true
   });
 
+  renderer.setScissorTest(true);
+
   requestAnimationFrame(render);
 
   return renderer.domElement;
 }
 
+const objs = []
 
 const add = obj => {
-  scene.add(obj);
+  objs.push(obj)
+  //scene.add(obj);
 }
 
 
@@ -52,30 +56,20 @@ const update = () => {
   overlayWidth = window.innerWidth;
   overlayHeight = window.innerHeight;
   camera = null;
-
+  renderer.setSize(overlayWidth, overlayHeight);
+  renderer.autoClear = false;
   // Walk over each object and update it
-  scene.children.forEach(child => {
+  objs.forEach(child => {
     let elem = child.elem;
     if (elem) {
 
       let width = elem.offsetWidth;
-      let transform = domUtils.getTransformForElement(elem);
+      let transformMatrix = domUtils.getTransformForElement(elem);
 
-      // If we haven't yet figured out which type of camera to use for
-      // projecting the scene, do it now. If the current element doesn't have
-      // a parent with a `perspective`, we use orthographic projection.
-      if (!camera) {
-        if (transform.perspective) {
-          camera = setPerspectiveCamera(transform.perspective, transform.perspectiveOrigin);
-        } else {
-          camera = setOrthographicCamera();
-        }
-      }
-
-      // Apply the transform matrix of them DOM node to the model
-      child.rotation.setFromRotationMatrix(transform.matrix);
-      child.position.setFromMatrixPosition(transform.matrix);
-      child.scale.setFromMatrixScale(transform.matrix);
+      // Apply the transform matrix of the DOM node to the model
+      child.rotation.setFromRotationMatrix(transformMatrix);
+      child.position.setFromMatrixPosition(transformMatrix);
+      child.scale.setFromMatrixScale(transformMatrix);
 
       // Objects are normalised so we can scale them up by their width to
       // render them at the intended size. Scaling by a factor of `0` causes
@@ -88,16 +82,43 @@ const update = () => {
       // screen to match the CSS rendering position.
       child.position.x += width - overlayWidth / 2;;
       child.position.y += overlayHeight / 2;
-    }
 
-    // TODO: determine if this object is visible the viewport and set the
-    // `needsRender` flag accordingly
-    if (!needsRender) {
-      needsRender = true;
+      // TODO: determine if this object is visible the viewport and set the
+      // `needsRender` flag accordingly
+
+      let projection = domUtils.getProjectionForElement(elem);
+
+      if (projection.perspective) {
+        let camBox = {
+          x: projection.cameraBounds.left,
+          y: projection.cameraBounds.top,
+          width: projection.clipBounds.right - projection.clipBounds.left,
+          height: projection.clipBounds.bottom - projection.clipBounds.top
+        }
+        camera = setPerspectiveCamera(camBox, projection.perspective, projection.perspectiveOrigin);
+      } else {
+        camera = setOrthographicCamera();
+      }
+
+
+      let clipHeight = projection.clipBounds.bottom - projection.clipBounds.top;
+      let clipWidth = projection.clipBounds.right - projection.clipBounds.left;
+      if (clipWidth > 0 && clipHeight > 0) {
+        renderer.setScissor(
+          projection.clipBounds.left,
+          projection.clipBounds.top,
+          clipWidth,
+          clipHeight
+        );
+        scene.add(child);
+        renderer.render(scene, camera);
+        scene.remove(child);
+      }
+
     }
   });
 
-  return camera && needsRender;
+  return !!camera;
 }
 
 
@@ -121,12 +142,15 @@ const setOrthographicCamera = () => {
 }
 
 
-const setPerspectiveCamera = (perspective, perspectiveOrigin) => {
+const setPerspectiveCamera = (bounds, perspective, perspectiveOrigin) => {
   let camera;
   
   if (!perspectiveCamera) {
     perspectiveCamera = new THREE.PerspectiveCamera();
   }
+
+  //overlayHeight = bounds.height;
+  //overlayWidth = bounds.width;
 
   camera = perspectiveCamera;
   camera.fov = 180 * (2 * Math.atan(overlayHeight / 2 / perspective)) / Math.PI;
@@ -135,13 +159,18 @@ const setPerspectiveCamera = (perspective, perspectiveOrigin) => {
   camera.updateProjectionMatrix();
 
   // Add perspective-origin
-  let originX = overlayWidth / 2 - perspectiveOrigin.x;
-  let originY = overlayHeight / 2 - perspectiveOrigin.y;
+
+  // TODO: fix this \
+  let originX = overlayWidth / 2 - bounds.x - perspectiveOrigin.x;
+  let originY = overlayHeight / 2 - bounds.y - perspectiveOrigin.y;
+
+  //let originY = (overlayHeight/2) - perspectiveOrigin.y;
+
 
   // The default is origin for perspective is `50% 50%`, which equates to
   // `0,0`. If the author hasn't specified a different value we don't need
   // to make any adjustments to the projection matrix
-  if (originX !==0 || originY !== 0) {
+  if (originX !== 0 || originY !== 0) {
 
     // copy the projection matrix
     let tmpMatrix = camera.projectionMatrix.clone();
@@ -159,6 +188,7 @@ const setPerspectiveCamera = (perspective, perspectiveOrigin) => {
     // remove the origin offset
     tmpMatrix.makeTranslation(originX, -originY, 0);
     camera.projectionMatrix.multiply(tmpMatrix);
+
   }
 
   return camera;
@@ -167,11 +197,7 @@ const setPerspectiveCamera = (perspective, perspectiveOrigin) => {
 
 const render = () => {
   requestAnimationFrame(render);
-
-  if (update()) {
-    renderer.setSize(overlayWidth, overlayHeight);
-    renderer.render(scene, camera);
-  };
+  update();
 }
 
 
