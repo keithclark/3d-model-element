@@ -10,6 +10,8 @@ let renderer;
 let scene;
 let light;
 
+const objs = [];
+
 
 const init = () => {
   if (scene) {
@@ -37,16 +39,24 @@ const init = () => {
   return renderer.domElement;
 }
 
-const objs = []
 
 const add = obj => {
-  objs.push(obj)
-  //scene.add(obj);
+  let index = objs.indexOf(obj);
+  if (index === -1) {
+    objs.push(obj);
+    return true;
+  }
+  return false;
 }
 
 
 const remove = (obj) => {
-  scene.remove(obj);
+  let index = objs.indexOf(obj);
+  if (index > -1) {
+    objs.splice(index, 1);
+    return true;
+  }
+  return false;
 }
 
 
