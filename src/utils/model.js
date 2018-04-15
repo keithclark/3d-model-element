@@ -1,7 +1,7 @@
 /* While mapping objects to a DOM element, it's useful to have a bounding box
 to reference. Enabling this flag will produce just that, a 2D bounding rect
 that should match the related DOM element */
-const RENDER_OBJECT_BOUNDING_BOX = true;
+const RENDER_OBJECT_BOUNDING_BOX = false;
 
 
 const normalize = obj => {
@@ -14,7 +14,7 @@ const normalize = obj => {
   obj.position.multiplyScalar(-scale);
   obj.scale.set(scale, scale, scale);
   return obj;
-}
+};
 
 
 const createDebugBoundingBox = obj => {
@@ -23,7 +23,7 @@ const createDebugBoundingBox = obj => {
   let wireframe = new THREE.WireframeGeometry(geometry);
   let boundingBox = new THREE.LineSegments(wireframe, material);
   return boundingBox;
-}
+};
 
 
 const createContainer = obj => {
@@ -36,11 +36,11 @@ const createContainer = obj => {
   container.add(obj);
 
   return container;
-}
+};
 
 
 export default {
   normalize,
   createDebugBoundingBox,
   createContainer
-}
+};
