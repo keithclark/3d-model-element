@@ -73,9 +73,6 @@ const getTransformForElement = elem => {
 const getProjectionForElement = elem => {
   let perspectiveOrigin = new THREE.Vector3();
   let perspective;
-  let osParent = elem;
-  let posX = 0;
-  let posY = 0;
   let clipBounds = {
     left: 0,
     top: 0,
