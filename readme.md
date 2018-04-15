@@ -65,7 +65,7 @@ Here's a cut-and-paste example:
 
 ### Positioning models
 
-Models can be positioned and rotated using CSS transforms. Any transforms applied to a model element will also be applied to the model.
+Models can be positioned and rotated using CSS transforms. Any transforms applied to a model element will also be applied to the model. 
 
 ```css
 .model {
@@ -73,12 +73,7 @@ Models can be positioned and rotated using CSS transforms. Any transforms applie
 }
 ```
 
-### A note on perspective
-
-If you have a `perspective` property value defined in your CSS, the model element will use it to render the object with the correct perspective. Omitting `perspective` (or setting it to zero) will result in objects rendered with orthographic projection.
-
-
-_Note: It's perfectly valid to nest perspective rules in CSS. However, models will only use the first perspective definition when walking up the DOM tree._
+If a model element has an ancestor with a valid `perspective` / `perspective-origin` style property, the model will be renderered using perspective projection. Omitting `perspective` (or setting it to zero) will result in objects being rendered with orthographic projection.
 
 
 ---
@@ -87,7 +82,7 @@ _Note: It's perfectly valid to nest perspective rules in CSS. However, models wi
 
 The model-element script creates a camera, scene, light source and a WebGL renderer. The DOM node returned by the renderer (a `<canvas>` element) is added to the document and configured to fill the viewport and sit above all other content. Additionally, `pointer-events: none` is set, allowing elements below to be interacted with.
 
-Adding `<x-model>` elements to the DOM results in the model being loaded and added to the underling scene. Removing an element from the DOM will remove it from the scene.
+Adding `<x-model>` elements to the DOM results in the model being loaded and added to the underlying scene. Removing an element from the DOM will remove it from the scene.
 
 The scene is re-rendered every frame. For each object in the scene, the renderer finds it's host node and walks up the DOM tree resolving any transforms, positions and scroll offsets. The resulting transform matrix is then applied to the object in the scene. Once all objects are updated the renderer repaints the scene to the layer. Objects now appear on-screen, synchronised with their host DOM node.
 
@@ -105,10 +100,10 @@ The scene is re-rendered every frame. For each object in the scene, the renderer
 
 1) Clone this repo.
 2) Install dependencies: `npm install`
-3) Build the project with the watch task: `npm start dev`
+3) Build the project with the watch task: `npm run dev`
 4) Start editing...
 
 
 ## Other build options
 
-* `npm start dist` - builds the both the unminified and minified distribution files to the `/dist/` folder.
+* `npm run dist` - builds the both the unminified and minified distribution files to the `/dist/` folder.
