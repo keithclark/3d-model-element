@@ -10,7 +10,7 @@ const register = (ext, handler) => {
     load: handler,
     objectCache: {}
   };
-}
+};
 
 
 const load = src => {
@@ -42,7 +42,7 @@ const load = src => {
   }
   
   return object.then(model => model.clone());
-}
+};
 
 
 export default {
