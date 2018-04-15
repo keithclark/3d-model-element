@@ -17,7 +17,7 @@ const getTransformForElement = elem => {
 
   // if this element doesn't have a width or height bail out now.
   if (elem.offsetWidth === 0 || elem.offsetHeight === 0) {
-    return m1
+    return m1;
   }
 
   posX -= elem.offsetWidth / 2;
@@ -66,8 +66,8 @@ const getTransformForElement = elem => {
     }
   }
 
-  return m1
-}
+  return m1;
+};
 
 
 const getProjectionForElement = elem => {
@@ -131,8 +131,8 @@ const getProjectionForElement = elem => {
     perspectiveOrigin: perspectiveOrigin,
     clipBounds: clipBounds,
     cameraBounds: cameraBounds
-  }
-}
+  };
+};
 
 
 
@@ -140,7 +140,7 @@ const createStylesheet = cssText => {
   let styleElem = document.createElement('style');
   styleElem.textContent = cssText;
   return styleElem;
-}
+};
 
 
 
@@ -148,4 +148,4 @@ export default {
   getTransformForElement,
   getProjectionForElement,
   createStylesheet
-}
+};

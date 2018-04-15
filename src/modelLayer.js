@@ -37,7 +37,7 @@ const init = () => {
   requestAnimationFrame(render);
 
   return renderer.domElement;
-}
+};
 
 
 const add = obj => {
@@ -47,7 +47,7 @@ const add = obj => {
     return true;
   }
   return false;
-}
+};
 
 
 const remove = (obj) => {
@@ -57,7 +57,7 @@ const remove = (obj) => {
     return true;
   }
   return false;
-}
+};
 
 
 const update = () => {
@@ -105,7 +105,7 @@ const update = () => {
       // Three's coordinate space uses 0,0,0 as the screen centre so we need
       // to adjust the computed X/Y position back to the top-left of the screen
       // to match the CSS rendering position.
-      child.position.x += width - overlayWidth / 2;;
+      child.position.x += width - overlayWidth / 2;
       child.position.y += overlayHeight / 2;
 
       // Determine which camera to use to project this model and set its
@@ -135,7 +135,7 @@ const update = () => {
   });
 
   return !!camera;
-}
+};
 
 
 const setOrthographicCamera = () => {
@@ -146,8 +146,8 @@ const setOrthographicCamera = () => {
   } 
   
   camera = orthographicCamera;
-  camera.left = -overlayWidth / 2;;
-  camera.right = overlayWidth / 2;;
+  camera.left = -overlayWidth / 2;
+  camera.right = overlayWidth / 2;
   camera.top = overlayHeight / 2;
   camera.bottom = -overlayHeight / 2;
   camera.far = 2000;
@@ -155,7 +155,7 @@ const setOrthographicCamera = () => {
   camera.updateProjectionMatrix();
 
   return camera;
-}
+};
 
 
 const setPerspectiveCamera = (bounds, perspective, perspectiveOrigin) => {
@@ -201,13 +201,13 @@ const setPerspectiveCamera = (bounds, perspective, perspectiveOrigin) => {
   }
 
   return camera;
-}
+};
 
 
 const render = () => {
   requestAnimationFrame(render);
   update();
-}
+};
 
 
 export default {
@@ -215,4 +215,4 @@ export default {
   add,
   remove,
   render
-}
+};
