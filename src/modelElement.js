@@ -35,7 +35,7 @@ const initModelLayer = () => {
   let renderDomElement = modelLayer.init();
   renderDomElement.setAttribute('id', 'x-model-renderLayer');
   document.documentElement.appendChild(renderDomElement);
-}
+};
 
 
 export default class extends HTMLElement {

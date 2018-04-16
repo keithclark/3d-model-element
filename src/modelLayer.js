@@ -22,9 +22,15 @@ const init = () => {
   scene = new THREE.Scene();
 
   // add a light
-  light = new THREE.DirectionalLight(0xffffff, 1);
-  light.position.set(0, 0, 1);
+  light = new THREE.PointLight(0x808080, 2, 0);
+  light.position.set(0, 0, 0);
   scene.add(light);
+
+  /*
+  var sphereSize = .5;
+  var pointLightHelper = new THREE.PointLightHelper( light, sphereSize, 0xff00ff );
+  scene.add( pointLightHelper );
+  */
 
   // create the WebGL renderer
   renderer = new THREE.WebGLRenderer({
@@ -107,6 +113,10 @@ const update = () => {
       // to match the CSS rendering position.
       child.position.x += width - overlayWidth / 2;
       child.position.y += overlayHeight / 2;
+
+      light.position.x = projection.cameraBounds.left + (projection.cameraBounds.right - projection.cameraBounds.left) / 2 - overlayWidth / 2;
+      light.position.y = overlayHeight / 2 - projection.cameraBounds.top - (projection.cameraBounds.bottom - projection.cameraBounds.top) / 2;
+      light.position.z = projection.perspective - 1;
 
       // Determine which camera to use to project this model and set its
       // properties prior to rendering
