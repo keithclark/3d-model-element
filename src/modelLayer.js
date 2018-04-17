@@ -114,10 +114,6 @@ const update = () => {
       child.position.x += width - overlayWidth / 2;
       child.position.y += overlayHeight / 2;
 
-      light.position.x = projection.cameraBounds.left + (projection.cameraBounds.right - projection.cameraBounds.left) / 2 - overlayWidth / 2;
-      light.position.y = overlayHeight / 2 - projection.cameraBounds.top - (projection.cameraBounds.bottom - projection.cameraBounds.top) / 2;
-      light.position.z = projection.perspective - 1;
-
       // Determine which camera to use to project this model and set its
       // properties prior to rendering
       if (projection.perspective) {
@@ -129,6 +125,10 @@ const update = () => {
       } else {
         camera = setOrthographicCamera();
       }
+
+      light.position.x = projection.cameraBounds.left + (projection.cameraBounds.right - projection.cameraBounds.left) / 2 - overlayWidth / 2;
+      light.position.y = overlayHeight / 2 - projection.cameraBounds.top - (projection.cameraBounds.bottom - projection.cameraBounds.top) / 2;
+      light.position.z = camera.far;
 
       // Set the clipping box (scissor) and render the element.
       renderer.setScissor(
@@ -160,7 +160,6 @@ const setOrthographicCamera = () => {
   camera.right = overlayWidth / 2;
   camera.top = overlayHeight / 2;
   camera.bottom = -overlayHeight / 2;
-  camera.far = 2000;
   camera.near = -700;
   camera.updateProjectionMatrix();
 
