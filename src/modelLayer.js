@@ -39,7 +39,8 @@ const init = () => {
   });
 
   renderer.setScissorTest(true);
-
+  renderer.autoClear = false;
+  renderer.sortObjects = false;
   requestAnimationFrame(render);
 
   return renderer.domElement;
@@ -71,7 +72,7 @@ const update = () => {
   overlayHeight = window.innerHeight;
   camera = null;
   renderer.setSize(overlayWidth, overlayHeight);
-  renderer.autoClear = false;
+  renderer.clear();
 
   // Walk over each object and update it
   objs.forEach(child => {
