@@ -123,7 +123,7 @@ const update = () => {
           projection.perspectiveOrigin
         );
       } else {
-        camera = setOrthographicCamera();
+        camera = setOrthographicCamera(projection.cameraBounds);
       }
 
       light.position.x = projection.cameraBounds.left + (projection.cameraBounds.right - projection.cameraBounds.left) / 2 - overlayWidth / 2;
@@ -148,7 +148,7 @@ const update = () => {
 };
 
 
-const setOrthographicCamera = () => {
+const setOrthographicCamera = (bounds) => {
   let camera;
   
   if (!orthographicCamera) {
@@ -156,10 +156,10 @@ const setOrthographicCamera = () => {
   } 
   
   camera = orthographicCamera;
-  camera.left = -overlayWidth / 2;
-  camera.right = overlayWidth / 2;
-  camera.top = overlayHeight / 2;
-  camera.bottom = -overlayHeight / 2;
+  camera.left = bounds.left - overlayWidth / 2;
+  camera.top = -bounds.top + overlayHeight / 2;
+  camera.bottom = -bounds.bottom + overlayHeight / 2;
+  camera.right = bounds.right - overlayWidth / 2;
   camera.near = -700;
   camera.updateProjectionMatrix();
 
