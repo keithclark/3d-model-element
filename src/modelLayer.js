@@ -39,6 +39,7 @@ const init = () => {
   });
 
   renderer.setScissorTest(true);
+  renderer.setClearColor(0x000000, 0);
   renderer.autoClear = false;
   renderer.sortObjects = false;
   requestAnimationFrame(render);
