@@ -1,6 +1,6 @@
 {
   "name": "model-element",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This is a experimental custom element that allows 3D objects (.obj format) to be loaded into a document and rendered inline, just like any other external resource. Additionally, any CSS transforms applied to a model element will be passed on to the 3D object, allowing complex objects to be placed and maniplulated using just CSS.",
   "main": "src/index.js",
   "directories": {

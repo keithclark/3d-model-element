@@ -46,7 +46,7 @@
     normalize,
     createDebugBoundingBox,
     createContainer
-  }
+  };
 
   const getFileExtension = url => {
     let path = url.split(/[?#]/)[0];
@@ -141,36 +141,37 @@
    * (https://keithclark.co.uk/articles/calculating-element-vertex-data-from-css-transforms/)
    */
 
-    const parseTransformValue = (matrixString, mat4) => {
-      var c = matrixString.split(/\s*[(),]\s*/).slice(1, -1);
+  const parseTransformValue = (matrixString, mat4) => {
+    var c = matrixString.split(/\s*[(),]\s*/).slice(1, -1);
 
-      if (c.length === 6) {
-        // 'matrix()' (3x2)
-        mat4.set(
-          +c[0], -c[2],      0,  +c[4],
-          -c[1], +c[3],      0,  -c[5],
-              0,     0,      1,      0,
-              0,     0,      0,      1
-        );
-      } else if (c.length === 16) { 
-        // matrix3d() (4x4)
-        mat4.set(
-          +c[0], -c[4],  +c[8], +c[12],
-          -c[1], +c[5],  -c[9], -c[13],
-          +c[2], -c[6], +c[10], +c[14],
-          +c[3], +c[7], +c[11], +c[15]
-        );
-      } else {
-        // handle 'none' or invalid values.
-        mat4.identity();
-      }
-    };
+    if (c.length === 6) {
+      // 'matrix()' (3x2)
+      mat4.set(
+        +c[0], -c[2],      0,  +c[4],
+        -c[1], +c[3],      0,  -c[5],
+            0,     0,      1,      0,
+            0,     0,      0,      1
+      );
+    } else if (c.length === 16) {
+      // matrix3d() (4x4)
+      mat4.set(
+        +c[0], -c[4],  +c[8], +c[12],
+        -c[1], +c[5],  -c[9], -c[13],
+        +c[2], -c[6], +c[10], +c[14],
+        +c[3], +c[7], +c[11], +c[15]
+      );
+    } else {
+      // handle 'none' or invalid values.
+      mat4.identity();
+    }
+  };
+
 
   var cssUtils = {
     parseTransformValue,
     parseOriginValue,
     parseUnitValue
-  }
+  };
 
   /**
    * Resolves and returns the transform and perspective properties for a given
@@ -182,18 +183,14 @@
     let transformMatrix = new THREE.Matrix4();
     let transformOrigin = new THREE.Vector3();
     let transformOriginMatrix = new THREE.Matrix4();
-    let perspectiveOrigin = new THREE.Vector3();
     let osParent = elem;
     let stack = [];
     let posX = 0;
     let posY = 0;
-    let perspective = 0;
 
     // if this element doesn't have a width or height bail out now.
     if (elem.offsetWidth === 0 || elem.offsetHeight === 0) {
-      return {
-        matrix: m1
-      };
+      return m1;
     }
 
     posX -= elem.offsetWidth / 2;
@@ -222,22 +219,6 @@
 
       let style = getComputedStyle(elem);
 
-      // TODO: It's possible to nest perspectives. Need to research the impact
-      // of this and, if possible, how to emulate it. For now, we'll just use
-      // the last value found.
-      let perspectiveValue = style.perspective;
-      if (perspectiveValue !== 'none') {
-        perspective = cssUtils.parseUnitValue(perspectiveValue);
-
-        // TODO: strictly speaking, `perspective-origin` can be set on any
-        // element, not just the one that has `perspective`. Research the impact
-        // of setting perspective-origin on different elements in the DOM tree.
-        let perspectiveOriginValue = style.perspectiveOrigin;
-        if (perspectiveOriginValue) {
-          cssUtils.parseOriginValue(perspectiveOriginValue, perspectiveOrigin);
-        }
-      }
-
       cssUtils.parseOriginValue(style.transformOrigin, transformOrigin);
       cssUtils.parseTransformValue(style.transform, transformMatrix);
 
@@ -249,7 +230,7 @@
       // (`0,0,0` in THREE coordinate space) then we need to translate by the
       // origin before multiplying the element's transform matrix. Finally, we
       // need undo the translation.
-      if (ox !==0 || oy !==0 || oz !== 0) {
+      if (ox !== 0 || oy !== 0 || oz !== 0) {
         m1.multiply(transformOriginMatrix.makeTranslation(ox, -oy, oz));
         m1.multiply(transformMatrix);
         m1.multiply(transformOriginMatrix.makeTranslation(-ox, oy, -oz));
@@ -258,12 +239,74 @@
       }
     }
 
+    return m1;
+  };
+
+
+  const getProjectionForElement = elem => {
+    let perspectiveOrigin = new THREE.Vector3();
+    let perspective;
+    let clipBounds = {
+      left: 0,
+      top: 0,
+      right: innerWidth,
+      bottom: innerHeight
+    };
+    let cameraBounds = {
+      left: 0,
+      top: 0,
+      right: innerWidth,
+      bottom: innerHeight
+    };
+
+
+    while (elem) {
+      let style = getComputedStyle(elem);
+      let elemBounds = elem.getBoundingClientRect();
+
+      // TODO: It's possible to nest perspectives. Need to research the impact
+      // of this and, if possible, how to emulate it. For now, we'll just use
+      // the last value found.
+      let perspectiveValue = style.perspective;
+      if (!perspective) {
+        if (perspectiveValue !== 'none') {
+          perspective = cssUtils.parseUnitValue(perspectiveValue);
+
+          cameraBounds.top = elemBounds.top;
+          cameraBounds.left = elemBounds.left;
+          cameraBounds.right = elemBounds.right;
+          cameraBounds.bottom = elemBounds.bottom;
+
+          // TODO: strictly speaking, `perspective-origin` can be set on any
+          // element, not just the one that has `perspective`. Research the impact
+          // of setting perspective-origin on different elements in the DOM tree.
+          let perspectiveOriginValue = style.perspectiveOrigin;
+          if (perspectiveOriginValue) {
+            cssUtils.parseOriginValue(perspectiveOriginValue, perspectiveOrigin);
+          }
+        }
+      }
+
+
+      if (style.overflow !== 'visible') {
+        clipBounds.top = Math.max(elemBounds.top, clipBounds.top);
+        clipBounds.left = Math.max(elemBounds.left, clipBounds.left);
+        clipBounds.right = Math.min(elemBounds.right, clipBounds.right);
+        clipBounds.bottom = Math.min(elemBounds.bottom, clipBounds.bottom);
+      }
+
+      elem = elem.parentElement;
+
+    }
+
     return {
-      matrix: m1,
       perspective: perspective,
-      perspectiveOrigin: perspectiveOrigin
+      perspectiveOrigin: perspectiveOrigin,
+      clipBounds: clipBounds,
+      cameraBounds: cameraBounds
     };
   };
+
 
 
   const createStylesheet = cssText => {
@@ -273,10 +316,12 @@
   };
 
 
+
   var domUtils = {
     getTransformForElement,
+    getProjectionForElement,
     createStylesheet
-  }
+  };
 
   let camera;
   let overlayWidth;
@@ -286,6 +331,8 @@
   let renderer;
   let scene;
   let light;
+
+  const objs = [];
 
 
   const init = () => {
@@ -297,9 +344,15 @@
     scene = new THREE.Scene();
 
     // add a light
-    light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(0, 0, 1);
+    light = new THREE.PointLight(0x808080, 2, 0);
+    light.position.set(0, 0, 0);
     scene.add(light);
+
+    /*
+    var sphereSize = .5;
+    var pointLightHelper = new THREE.PointLightHelper( light, sphereSize, 0xff00ff );
+    scene.add( pointLightHelper );
+    */
 
     // create the WebGL renderer
     renderer = new THREE.WebGLRenderer({
@@ -307,6 +360,10 @@
       alpha: true
     });
 
+    renderer.setScissorTest(true);
+    renderer.setClearColor(0x000000, 0);
+    renderer.autoClear = false;
+    renderer.sortObjects = false;
     requestAnimationFrame(render);
 
     return renderer.domElement;
@@ -314,70 +371,108 @@
 
 
   const add = obj => {
-    scene.add(obj);
+    let index = objs.indexOf(obj);
+    if (index === -1) {
+      objs.push(obj);
+      return true;
+    }
+    return false;
   };
 
 
   const remove = (obj) => {
-    scene.remove(obj);
+    let index = objs.indexOf(obj);
+    if (index > -1) {
+      objs.splice(index, 1);
+      return true;
+    }
+    return false;
   };
 
 
   const update = () => {
-    let needsRender = false;
-
     overlayWidth = window.innerWidth;
     overlayHeight = window.innerHeight;
     camera = null;
+    renderer.setSize(overlayWidth, overlayHeight);
+    renderer.clear();
 
     // Walk over each object and update it
-    scene.children.forEach(child => {
+    objs.forEach(child => {
       let elem = child.elem;
       if (elem) {
-
+        let projection;
+        let transformMatrix;
+        let clipHeight;
+        let clipWidth;
         let width = elem.offsetWidth;
-        let transform = domUtils.getTransformForElement(elem);
 
-        // If we haven't yet figured out which type of camera to use for
-        // projecting the scene, do it now. If the current element doesn't have
-        // a parent with a `perspective`, we use orthographic projection.
-        if (!camera) {
-          if (transform.perspective) {
-            camera = setPerspectiveCamera(transform.perspective, transform.perspectiveOrigin);
-          } else {
-            camera = setOrthographicCamera();
-          }
+        // If the elements width is `0`, bail out early.
+        if (width === 0) {
+          return;
         }
 
-        // Apply the transform matrix of them DOM node to the model
-        child.rotation.setFromRotationMatrix(transform.matrix);
-        child.position.setFromMatrixPosition(transform.matrix);
-        child.scale.setFromMatrixScale(transform.matrix);
+        projection = domUtils.getProjectionForElement(elem);
+        clipHeight = projection.clipBounds.bottom - projection.clipBounds.top;
+        clipWidth = projection.clipBounds.right - projection.clipBounds.left;
+
+        // If the elements clip area has a height or width of `0`, bail out early.
+        if (clipWidth <= 0 || clipHeight <= 0) {
+          return;
+        }
+
+        transformMatrix = domUtils.getTransformForElement(elem);
+
+        // Apply the transform matrix of the DOM node to the model
+        child.rotation.setFromRotationMatrix(transformMatrix);
+        child.position.setFromMatrixPosition(transformMatrix);
+        child.scale.setFromMatrixScale(transformMatrix);
 
         // Objects are normalised so we can scale them up by their width to
-        // render them at the intended size. Scaling by a factor of `0` causes
-        // problems with inverting matrix because the determinant will be 0 so
-        // we use a default of `1`.
-        child.scale.multiplyScalar(width || 1);
+        // render them at the intended size.
+        child.scale.multiplyScalar(width);
 
         // Three's coordinate space uses 0,0,0 as the screen centre so we need
-        // to adjust the computed X/Y position back to the top-left of the
-        // screen to match the CSS rendering position.
-        child.position.x += width - overlayWidth / 2;      child.position.y += overlayHeight / 2;
-      }
+        // to adjust the computed X/Y position back to the top-left of the screen
+        // to match the CSS rendering position.
+        child.position.x += width - overlayWidth / 2;
+        child.position.y += overlayHeight / 2;
 
-      // TODO: determine if this object is visible the viewport and set the
-      // `needsRender` flag accordingly
-      if (!needsRender) {
-        needsRender = true;
+        // Determine which camera to use to project this model and set its
+        // properties prior to rendering
+        if (projection.perspective) {
+          camera = setPerspectiveCamera(
+            projection.cameraBounds,
+            projection.perspective,
+            projection.perspectiveOrigin
+          );
+        } else {
+          camera = setOrthographicCamera(projection.cameraBounds);
+        }
+
+        light.position.x = projection.cameraBounds.left + (projection.cameraBounds.right - projection.cameraBounds.left) / 2 - overlayWidth / 2;
+        light.position.y = overlayHeight / 2 - projection.cameraBounds.top - (projection.cameraBounds.bottom - projection.cameraBounds.top) / 2;
+        light.position.z = camera.far;
+
+        // Set the clipping box (scissor) and render the element.
+        renderer.setScissor(
+          projection.clipBounds.left,
+          projection.clipBounds.top,
+          clipWidth,
+          clipHeight
+        );
+        scene.add(child);
+        renderer.render(scene, camera);
+        scene.remove(child);
+
       }
     });
 
-    return camera && needsRender;
+    return !!camera;
   };
 
 
-  const setOrthographicCamera = () => {
+  const setOrthographicCamera = (bounds) => {
     let camera;
     
     if (!orthographicCamera) {
@@ -385,9 +480,10 @@
     } 
     
     camera = orthographicCamera;
-    camera.left = -overlayWidth / 2;  camera.right = overlayWidth / 2;  camera.top = overlayHeight / 2;
-    camera.bottom = -overlayHeight / 2;
-    camera.far = 2000;
+    camera.left = bounds.left - overlayWidth / 2;
+    camera.top = -bounds.top + overlayHeight / 2;
+    camera.bottom = -bounds.bottom + overlayHeight / 2;
+    camera.right = bounds.right - overlayWidth / 2;
     camera.near = -700;
     camera.updateProjectionMatrix();
 
@@ -395,7 +491,7 @@
   };
 
 
-  const setPerspectiveCamera = (perspective, perspectiveOrigin) => {
+  const setPerspectiveCamera = (bounds, perspective, perspectiveOrigin) => {
     let camera;
     
     if (!perspectiveCamera) {
@@ -409,13 +505,14 @@
     camera.updateProjectionMatrix();
 
     // Add perspective-origin
-    let originX = overlayWidth / 2 - perspectiveOrigin.x;
-    let originY = overlayHeight / 2 - perspectiveOrigin.y;
+    let originX = overlayWidth / 2 - bounds.left - perspectiveOrigin.x;
+    let originY = overlayHeight / 2 - bounds.top - perspectiveOrigin.y;
+
 
     // The default is origin for perspective is `50% 50%`, which equates to
     // `0,0`. If the author hasn't specified a different value we don't need
     // to make any adjustments to the projection matrix
-    if (originX !==0 || originY !== 0) {
+    if (originX !== 0 || originY !== 0) {
 
       // copy the projection matrix
       let tmpMatrix = camera.projectionMatrix.clone();
@@ -433,6 +530,7 @@
       // remove the origin offset
       tmpMatrix.makeTranslation(originX, -originY, 0);
       camera.projectionMatrix.multiply(tmpMatrix);
+
     }
 
     return camera;
@@ -441,11 +539,8 @@
 
   const render = () => {
     requestAnimationFrame(render);
-
-    if (update()) {
-      renderer.setSize(overlayWidth, overlayHeight);
-      renderer.render(scene, camera);
-    }};
+    update();
+  };
 
 
   var modelLayer = {
@@ -453,7 +548,7 @@
     add,
     remove,
     render
-  }
+  };
 
   const objects = new WeakMap();
 
