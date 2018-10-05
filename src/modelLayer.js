@@ -37,6 +37,7 @@ const init = () => {
     alpha: true
   });
 
+  renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setScissorTest(true);
   renderer.setClearColor(0x000000, 0);
   renderer.autoClear = false;
