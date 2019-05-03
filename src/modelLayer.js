@@ -79,6 +79,11 @@ const update = () => {
   objs.forEach(child => {
     let elem = child.elem;
     if (elem) {
+
+    if (child.axisInView === 0) {
+      return;
+    }
+
       let projection;
       let transformMatrix;
       let clipHeight;
@@ -152,11 +157,11 @@ const update = () => {
 
 const setOrthographicCamera = (bounds) => {
   let camera;
-  
+
   if (!orthographicCamera) {
     orthographicCamera = new THREE.OrthographicCamera();
-  } 
-  
+  }
+
   camera = orthographicCamera;
   camera.left = bounds.left - overlayWidth / 2;
   camera.top = -bounds.top + overlayHeight / 2;
@@ -171,7 +176,7 @@ const setOrthographicCamera = (bounds) => {
 
 const setPerspectiveCamera = (bounds, perspective, perspectiveOrigin) => {
   let camera;
-  
+
   if (!perspectiveCamera) {
     perspectiveCamera = new THREE.PerspectiveCamera();
   }
