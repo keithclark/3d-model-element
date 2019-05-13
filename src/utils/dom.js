@@ -2,7 +2,7 @@ import cssUtils from './css';
 
 /**
  * Resolves and returns the transform and perspective properties for a given
- * element. 
+ * element.
  */
 
 const getTransformForElement = elem => {
@@ -15,13 +15,7 @@ const getTransformForElement = elem => {
   let posX = 0;
   let posY = 0;
 
-  // if this element doesn't have a width or height bail out now.
-  if (elem.offsetWidth === 0 || elem.offsetHeight === 0) {
-    return m1;
-  }
 
-  posX -= elem.offsetWidth / 2;
-  posY += elem.offsetHeight / 2;
 
   // We need to apply transforms from the root so we walk up the DOM tree,
   // pushing each node onto a stack. While we're walking to the DOM we also
@@ -45,7 +39,6 @@ const getTransformForElement = elem => {
   while (elem = stack.pop()) {
 
     let style = getComputedStyle(elem);
-
     cssUtils.parseOriginValue(style.transformOrigin, transformOrigin);
     cssUtils.parseTransformValue(style.transform, transformMatrix);
 
