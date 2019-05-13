@@ -1,6 +1,5 @@
 import domUtils from './utils/dom';
 
-let perspective;
 let camera;
 let overlayWidth;
 let overlayHeight;
@@ -79,21 +78,17 @@ const update = () => {
   objs.forEach(child => {
     let elem = child.elem;
     if (elem) {
-
-    if (child.axisInView === 0) {
-      return;
-    }
-
       let projection;
       let transformMatrix;
       let clipHeight;
       let clipWidth;
-      let width = elem.offsetWidth;
-
-      // If the elements width is `0`, bail out early.
-      if (width === 0) {
-        return;
-      }
+      let model = child.children[0];
+      let boundsElem = elem.shadowRoot.children[1];
+      let size = model.userData.size;
+      let elemWidth = elem.offsetWidth;
+      let elemHeight = elem.offsetHeight;
+      let scale = Math.min(elemWidth / size.x, elemHeight / size.y);
+      let objWidth = size.x * scale;
 
       projection = domUtils.getProjectionForElement(elem);
       clipHeight = projection.clipBounds.bottom - projection.clipBounds.top;
@@ -113,12 +108,22 @@ const update = () => {
 
       // Objects are normalised so we can scale them up by their width to
       // render them at the intended size.
-      child.scale.multiplyScalar(width);
+      child.scale.multiplyScalar(scale);
+
+      // Now scale the DOM bounding box so it matches the size and shape of the
+      // model. An `IntersectionObserver` will use this DOM structure to decide
+      // if this model needs to be rendered at the next animation frame.
+      let scaleX = size.x * scale;
+      let scaleY = size.y * scale;
+      let scaleZ = size.z * scale;
+      boundsElem.style.transform = `translate(-50%,-50%)scale3d(${scaleX},${scaleY},${scaleZ})`;
 
       // Three's coordinate space uses 0,0,0 as the screen centre so we need
       // to adjust the computed X/Y position back to the top-left of the screen
       // to match the CSS rendering position.
-      child.position.x += width - overlayWidth / 2;
+      child.position.x -= objWidth - elemWidth / 2;
+      child.position.x += objWidth - overlayWidth / 2;
+      child.position.y -= elemHeight / 2;
       child.position.y += overlayHeight / 2;
 
       // Determine which camera to use to project this model and set its
