@@ -7,7 +7,8 @@ const normalize = obj => {
 
   let scale = 1 / Math.max(size.x, size.y);
   obj.position.multiplyScalar(-scale);
-  obj.scale.set(scale, scale, scale);
+  obj.scale.multiplyScalar(scale);
+  obj.userData.size = size.multiplyScalar(scale).clone();
   return obj;
 };
 
