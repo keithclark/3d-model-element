@@ -145,7 +145,7 @@ const update = () => {
       // Set the clipping box (scissor) and render the element.
       renderer.setScissor(
         projection.clipBounds.left,
-        projection.clipBounds.top,
+        overlayHeight - projection.clipBounds.bottom,
         clipWidth,
         clipHeight
       );
