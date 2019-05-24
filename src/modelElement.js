@@ -6,6 +6,11 @@ import domUtils from './utils/dom';
 const objects = new WeakMap();
 
 
+const ATTR_TO_CUSTOM_PROP_MAP = {
+  'width': '--xModelWidth',
+  'height': '--xModelHeight'
+}
+
 const CANVAS_DEFAULT_STYLES =
   ':root{' +
     'transform-style:flat!important;' +
@@ -21,24 +26,27 @@ const CANVAS_DEFAULT_STYLES =
 const ELEMENT_DEFAULT_STYLES =
   ':host{' +
     'display:inline-block;' +
-    'width:var(--width,200px);' +
-    'height:var(--height,150px)' +
+    'width:var(--xModelWidth,200px);' +
+    'height:var(--xModelHeight,150px);' +
+    'transform-style:var(--xModelBoundingBoxTransformStyle, preserve-3d)' +
   '}' +
   '.boundingBox{' +
-    'visibility:hidden;' +
-    'transform-style:preserve-3d;' +
-    'position:relative;'+
+    'visibility:var(--xModelBoundingBoxVisibility, hidden);' +
+    'transform-style:inherit;' +
+    'position:relative;' +
     'left:50%;' +
     'top:50%;' +
     'width:1px;' +
-    'height:1px' +
+    'height:1px;' +
+    'background:#08c' +
   '}' +
   '.boundingBox__face{' +
     'position:absolute;' +
     'width:1px;' +
-    'height:1px' +
+    'height:1px;' +
+    'background:#0c0' +
   '}' +
-  '.boundingBox__face:nth-child(1){transform:translateZ(.5px)}' +
+  '.boundingBox__face:nth-child(1){transform:translateZ(-.5px)}' +
   '.boundingBox__face:nth-child(2){transform:translateZ(.5px)}' +
   '.boundingBox__face:nth-child(3){transform:translateY(-.5px)rotateX(90deg)}' +
   '.boundingBox__face:nth-child(4){transform:translateY(.5px)rotateX(-90deg)}' +
@@ -159,12 +167,13 @@ export default class extends HTMLElement {
     }
   }
 
-  async attributeChangedCallback(attribute, oldValue, newValue) {
+  attributeChangedCallback(attribute, oldValue, newValue) {
     if (attribute === 'width' || attribute === 'height') {
       if (newValue !== null) {
         newValue += 'px';
       }
-      this.shadowRoot.children[0].sheet.rules[0].style.setProperty(`--${attribute}`, newValue);
+      let customProp = ATTR_TO_CUSTOM_PROP_MAP[attribute];
+      this.shadowRoot.children[0].sheet.rules[0].style.setProperty(customProp, newValue);
     } else if (attribute === 'src') {
       // call the disconnected callback handler to release the current model if
       // one is attached
