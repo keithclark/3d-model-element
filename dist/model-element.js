@@ -1,11 +1,7 @@
+//! 3D Model Element v1.0.2 | (C) Keith Clark | MIT | https://github.com/keithclark/3d-model-element
+
 (function () {
   'use strict';
-
-  /* While mapping objects to a DOM element, it's useful to have a bounding box
-  to reference. Enabling this flag will produce just that, a 2D bounding rect
-  that should match the related DOM element */
-  const RENDER_OBJECT_BOUNDING_BOX = false;
-
 
   const normalize = obj => {
     let box = new THREE.Box3().setFromObject(obj);
@@ -15,36 +11,21 @@
 
     let scale = 1 / Math.max(size.x, size.y);
     obj.position.multiplyScalar(-scale);
-    obj.scale.set(scale, scale, scale);
+    obj.scale.multiplyScalar(scale);
+    obj.userData.size = size.multiplyScalar(scale).clone();
     return obj;
-  };
-
-
-  const createDebugBoundingBox = obj => {
-    let material = new THREE.LineBasicMaterial({color: 0x00ff00});
-    let geometry = new THREE.PlaneGeometry(1, 1);
-    let wireframe = new THREE.WireframeGeometry(geometry);
-    let boundingBox = new THREE.LineSegments(wireframe, material);
-    return boundingBox;
   };
 
 
   const createContainer = obj => {
     let container = new THREE.Object3D();
-
-    if (RENDER_OBJECT_BOUNDING_BOX) {
-      container.add(createDebugBoundingBox());
-    }
-
     container.add(obj);
-
     return container;
   };
 
 
   var modelUtils = {
     normalize,
-    createDebugBoundingBox,
     createContainer
   };
 
@@ -60,7 +41,7 @@
 
   var urlUtils = {
     getFileExtension
-  }
+  };
 
   const loaders = {};
 
@@ -175,7 +156,7 @@
 
   /**
    * Resolves and returns the transform and perspective properties for a given
-   * element. 
+   * element.
    */
 
   const getTransformForElement = elem => {
@@ -188,13 +169,7 @@
     let posX = 0;
     let posY = 0;
 
-    // if this element doesn't have a width or height bail out now.
-    if (elem.offsetWidth === 0 || elem.offsetHeight === 0) {
-      return m1;
-    }
 
-    posX -= elem.offsetWidth / 2;
-    posY += elem.offsetHeight / 2;
 
     // We need to apply transforms from the root so we walk up the DOM tree,
     // pushing each node onto a stack. While we're walking to the DOM we also
@@ -218,7 +193,6 @@
     while (elem = stack.pop()) {
 
       let style = getComputedStyle(elem);
-
       cssUtils.parseOriginValue(style.transformOrigin, transformOrigin);
       cssUtils.parseTransformValue(style.transform, transformMatrix);
 
@@ -405,12 +379,13 @@
         let transformMatrix;
         let clipHeight;
         let clipWidth;
-        let width = elem.offsetWidth;
-
-        // If the elements width is `0`, bail out early.
-        if (width === 0) {
-          return;
-        }
+        let model = child.children[0];
+        let boundsElem = elem.shadowRoot.children[1];
+        let size = model.userData.size;
+        let elemWidth = elem.offsetWidth;
+        let elemHeight = elem.offsetHeight;
+        let scale = Math.min(elemWidth / size.x, elemHeight / size.y);
+        let objWidth = size.x * scale;
 
         projection = domUtils.getProjectionForElement(elem);
         clipHeight = projection.clipBounds.bottom - projection.clipBounds.top;
@@ -430,12 +405,22 @@
 
         // Objects are normalised so we can scale them up by their width to
         // render them at the intended size.
-        child.scale.multiplyScalar(width);
+        child.scale.multiplyScalar(scale);
+
+        // Now scale the DOM bounding box so it matches the size and shape of the
+        // model. An `IntersectionObserver` will use this DOM structure to decide
+        // if this model needs to be rendered at the next animation frame.
+        let scaleX = size.x * scale;
+        let scaleY = size.y * scale;
+        let scaleZ = size.z * scale;
+        boundsElem.style.transform = `translate(-50%,-50%)scale3d(${scaleX},${scaleY},${scaleZ})`;
 
         // Three's coordinate space uses 0,0,0 as the screen centre so we need
         // to adjust the computed X/Y position back to the top-left of the screen
         // to match the CSS rendering position.
-        child.position.x += width - overlayWidth / 2;
+        child.position.x -= objWidth - elemWidth / 2;
+        child.position.x += objWidth - overlayWidth / 2;
+        child.position.y -= elemHeight / 2;
         child.position.y += overlayHeight / 2;
 
         // Determine which camera to use to project this model and set its
@@ -457,7 +442,7 @@
         // Set the clipping box (scissor) and render the element.
         renderer.setScissor(
           projection.clipBounds.left,
-          projection.clipBounds.top,
+          overlayHeight - projection.clipBounds.bottom,
           clipWidth,
           clipHeight
         );
@@ -474,11 +459,11 @@
 
   const setOrthographicCamera = (bounds) => {
     let camera;
-    
+
     if (!orthographicCamera) {
       orthographicCamera = new THREE.OrthographicCamera();
-    } 
-    
+    }
+
     camera = orthographicCamera;
     camera.left = bounds.left - overlayWidth / 2;
     camera.top = -bounds.top + overlayHeight / 2;
@@ -493,7 +478,7 @@
 
   const setPerspectiveCamera = (bounds, perspective, perspectiveOrigin) => {
     let camera;
-    
+
     if (!perspectiveCamera) {
       perspectiveCamera = new THREE.PerspectiveCamera();
     }
@@ -552,27 +537,93 @@
 
   const objects = new WeakMap();
 
-  const ELEMENT_DEFAULT_STYLES =
+
+  const ATTR_TO_CUSTOM_PROP_MAP = {
+    'width': '--xModelWidth',
+    'height': '--xModelHeight'
+  };
+
+  const CANVAS_DEFAULT_STYLES =
+    ':root{' +
+      'transform-style:flat!important;' +
+    '}' +
     '#x-model-renderLayer{' +
       'position:fixed;' +
       'top:0;' +
       'left:0;' +
       'pointer-events:none' +
-    '}' +
-    'x-model{' +
-      'display:inline-block;' +
-      'width:250px;' +
-      'height:250px' +
     '}';
 
+
+  const ELEMENT_DEFAULT_STYLES =
+    ':host{' +
+      'display:inline-block;' +
+      'width:var(--xModelWidth,200px);' +
+      'height:var(--xModelHeight,150px);' +
+      'transform-style:var(--xModelBoundingBoxTransformStyle, preserve-3d)' +
+    '}' +
+    '.boundingBox{' +
+      'visibility:var(--xModelBoundingBoxVisibility, hidden);' +
+      'transform-style:inherit;' +
+      'position:relative;' +
+      'left:50%;' +
+      'top:50%;' +
+      'width:1px;' +
+      'height:1px;' +
+      'background:#08c' +
+    '}' +
+    '.boundingBox__face{' +
+      'position:absolute;' +
+      'width:1px;' +
+      'height:1px;' +
+      'background:#0c0' +
+    '}' +
+    '.boundingBox__face:nth-child(1){transform:translateZ(-.5px)}' +
+    '.boundingBox__face:nth-child(2){transform:translateZ(.5px)}' +
+    '.boundingBox__face:nth-child(3){transform:translateY(-.5px)rotateX(90deg)}' +
+    '.boundingBox__face:nth-child(4){transform:translateY(.5px)rotateX(-90deg)}' +
+    '.boundingBox__face:nth-child(5){transform:translateX(.5px)rotateY(-90deg)}' +
+    '.boundingBox__face:nth-child(6){transform:translateX(-.5px)rotateY(-90deg)}';
+
+
+  const ELEMENT_HTML =
+    `<style>${ELEMENT_DEFAULT_STYLES}</style>` +
+    '<div class="boundingBox">' +
+      '<div class="boundingBox__face"></div>'.repeat(6) +
+    '</div>';
+
+
   let styleElem;
+  let intersectionObserver;
+
+
+  const intersectionCallback = entries => {
+    entries.forEach(entry => {
+      let obj = objects.get(entry.target.parentElement);
+      if (entry.isIntersecting) {
+        if (obj.axisInView < 6) {
+          if (obj.axisInView === 0) {
+            modelLayer.add(obj);
+          }
+          obj.axisInView++;
+        }
+      } else {
+        if (obj.axisInView > 0) {
+          obj.axisInView--;
+          if (obj.axisInView === 0) {
+            modelLayer.remove(obj);
+          }
+        }
+      }
+    });
+  };
 
 
   const initModelLayer = () => {
     // The first time an element is added to the document we inject a
     // stylesheet that contains its default styles. Ideally this would be
     // appended to the shadow DOM, but support for that isn't great right now.
-    styleElem = domUtils.createStylesheet(ELEMENT_DEFAULT_STYLES);
+    styleElem = domUtils.createStylesheet(CANVAS_DEFAULT_STYLES);
     let head = document.documentElement.firstChild;
     head.insertBefore(styleElem, head.firstChild);
 
@@ -582,6 +633,11 @@
     let renderDomElement = modelLayer.init();
     renderDomElement.setAttribute('id', 'x-model-renderLayer');
     document.documentElement.appendChild(renderDomElement);
+
+    // Use an intersection observer to watch for elements entering and leaving
+    // the viewport
+    intersectionObserver = new IntersectionObserver(intersectionCallback);
+
   };
 
 
@@ -589,35 +645,68 @@
 
     constructor() {
       super();
+      // Create six child elements. These will be rotated and translated along the
+      // X Y and Z axis to create a bounding box around the model. These
+      // elements will be monitored by an `IntersectionObserver` which will add
+      // the model to the scene if the any elements are visible in the viewport
+      // and remove the model when no elements are visible
+      this.attachShadow({mode: 'open'});
+      this.shadowRoot.innerHTML = ELEMENT_HTML;
     }
 
     static get observedAttributes() {
-      return ['src'];
+      return ['src', 'width', 'height'];
     }
 
     connectedCallback() {
       if (!styleElem) {
         initModelLayer();
       }
-
       let obj = objects.get(this);
       if (obj && obj.elem !== this) {
+        let model = obj.children[0];
+        let size = model.userData.size;
+        let scale = Math.min(this.offsetWidth / size.x, this.offsetHeight / size.y);
+        let scaleX = size.x * scale;
+        let scaleY = size.y * scale;
+        let scaleZ = size.z * scale;
+
+        // Scale and distort the DOM bounding box (a cube) along X, Y and Z axis
+        // so it matches the size and shape of the models bounding box.
+        let box = this.shadowRoot.querySelector('.boundingBox');
+        box.style.transform = `translate(-50%,-50%)scale3d(${scaleX},${scaleY},${scaleZ})`;
+
+        // Monitor each face with an `IntersectionObserver` so we can determine if
+        // the model is visible in the viewport when it's rendered with
+        // perspective projection.
+        let faces = Array.from(box.children);
+        faces.forEach(elem => intersectionObserver.observe(elem));
+
         obj.elem = this;
-        modelLayer.add(obj);
+        obj.axisInView = 0;
+
+        objects.set(box, obj);
       }
     }
 
     disconnectedCallback() {
       let obj = objects.get(this);
       if (obj && obj.elem === this) {
-        modelLayer.remove(obj);
+        let box = this.shadowRoot.querySelector('.boundingBox');
+        let faces = Array.from(box.children);
+        faces.forEach(elem => intersectionObserver.unobserve(elem));
         obj.elem = null;
       }
     }
 
     attributeChangedCallback(attribute, oldValue, newValue) {
-      if (attribute === 'src') {
-
+      if (attribute === 'width' || attribute === 'height') {
+        if (newValue !== null) {
+          newValue += 'px';
+        }
+        let customProp = ATTR_TO_CUSTOM_PROP_MAP[attribute];
+        this.shadowRoot.children[0].sheet.rules[0].style.setProperty(customProp, newValue);
+      } else if (attribute === 'src') {
         // call the disconnected callback handler to release the current model if
         // one is attached
         this.disconnectedCallback();
@@ -658,7 +747,7 @@
       return loader.load(src, loadHandler, null, errorHandler);
 
     });
-  }
+  };
 
   let loader$1;
 
@@ -682,7 +771,7 @@
       return loader$1.load(src, loadHandler, null, errorHandler);
 
     });
-  }
+  };
 
   if ('customElements' in window) {
 
