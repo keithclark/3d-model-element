@@ -21,7 +21,7 @@ This is a experimental custom element that allows 3D objects (currently, OBJ and
 
 ## Getting started
 
-To use this custom element you'll need to include the [three.js](https://threejs.org/) library, its accompanying [OBJ loader](https://github.com/mrdoob/three.js/blob/master/examples/js/loaders/OBJLoader.js) and/or [gLTF loader](https://github.com/mrdoob/three.js/blob/master/examples/js/loaders/GLTFLoader.js) along with the [custom element script](https://github.com/keithclark/3d-model-element/blob/master/dist/model-element.min.js):
+To use this custom element you'll need to include the [three.js](https://threejs.org/) library (r102+), its accompanying [OBJ loader](https://github.com/mrdoob/three.js/blob/master/examples/js/loaders/OBJLoader.js) and/or [gLTF loader](https://github.com/mrdoob/three.js/blob/master/examples/js/loaders/GLTFLoader.js) along with the [custom element script](https://github.com/keithclark/3d-model-element/blob/master/dist/model-element.min.js):
 
 ```html
 <script src="js/three.min.js"></script>
@@ -65,7 +65,7 @@ Here's a cut-and-paste example:
 
 ### Positioning models
 
-Models can be positioned and rotated using CSS transforms. Any transforms applied to a model element will also be applied to the model. 
+Models can be positioned and rotated using CSS transforms. Any transforms applied to a model element will also be applied to the model.
 
 ```css
 .model {
