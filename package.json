@@ -1,11 +1,14 @@
 {
   "name": "model-element",
-  "version": "1.0.1",
-  "description": "This is a experimental custom element that allows 3D objects (.obj format) to be loaded into a document and rendered inline, just like any other external resource. Additionally, any CSS transforms applied to a model element will be passed on to the 3D object, allowing complex objects to be placed and maniplulated using just CSS.",
-  "main": "src/index.js",
+  "version": "1.0.2",
+  "description": "This is a experimental custom element that allows 3D objects to be loaded into a document and rendered inline, just like any other external resource. Additionally, any CSS transforms applied to a model element will be passed on to the 3D object, allowing complex objects to be placed and maniplulated using just CSS.",
+  "main": "dist/model-element.min.js",
   "directories": {
     "example": "examples"
   },
+  "files": [
+    "dist/model-element.min.js"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "rollup -f iife -m -i src/index.js -o dist/model-element.js -w",
@@ -22,7 +25,7 @@
   "bugs": {
     "url": "https://github.com/keithclark/3d-model-element/issues"
   },
-  "homepage": "https://github.com/keithclark/3d-model-element#readme",
+  "homepage": "https://github.com/keithclark/3d-model-element",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-minify": "^0.3.0",
