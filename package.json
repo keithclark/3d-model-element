@@ -12,8 +12,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "rollup -f iife -m -i src/index.js -o dist/model-element.js -w",
-    "build": "rollup -f iife -m -i src/index.js -o dist/model-element.js",
-    "minify": "minify dist/model-element.js | cat src/banner.js - > dist/model-element.min.js",
+    "build": "rollup -f iife -m -i src/index.js -o dist/model-element.js --banner \"//! 3D Model Element v$npm_package_version | (C) $npm_package_author_name | $npm_package_license | $npm_package_homepage\n\"",
+    "minify": "minify dist/model-element.js > dist/model-element.min.js",
     "dist": "npm run build && npm run minify"
   },
   "repository": {
