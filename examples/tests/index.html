@@ -19,7 +19,7 @@
   }
   body {
     box-sizing: border-box;
-    background-image: 
+    background-image:
       linear-gradient(45deg, #e4e4e4 25%, transparent 25%),
       linear-gradient(-45deg, #e4e4e4 25%, transparent 25%),
       linear-gradient(45deg, transparent 75%, #e4e4e4 75%),
@@ -46,6 +46,10 @@
     width: 50vmin;
     height: 50vmin;
   }
+  .model--medium {
+    width: 37.5vmin;
+    height: 37.5vmin;
+  }
   .model--small {
     width: 25vmin;
     height: 25vmin;
@@ -60,6 +64,9 @@
     top: 50%;
     margin: -25vmin;
   }
+  .model--abs.model--medium {
+    margin: -18.75vmin;
+  }
   .model--abs.model--small {
     margin: -12.5vmin;
   }
@@ -71,7 +78,6 @@
   }
 
   .model-wrap {
-    border: 1px dashed green;
     margin: auto;
     position: relative;
   }
@@ -87,7 +93,6 @@
   }
   .test .model {
     display: inline-block;
-    border: 1px dashed red;
   }
   .test--fail {
     color: #c00;
@@ -166,7 +171,7 @@
   <h1>Custom element for rendering 3D models and controlling them with CSS</h1>
   <p>This is test page for a prototype <code>&lt;model&gt;</code> custom element.
     The model element allows 3D objects to be loaded into a document and rendered
-    inline, just like any other visual resource. Additionally, any CSS transforms 
+    inline, just like any other visual resource. Additionally, any CSS transforms
     applied to a <code>&lt;model&gt;</code> element will be passed on the model,
     allowing complex objects to be placed and maniplulated using just CSS.</p>
 
@@ -190,7 +195,7 @@
 }
 &lt;style&gt;
 
-&lt;x-model class="model" src="../assets/models/LeePerrySmith.obj"&gt;&lt;/x-model&gt;
+&lt;x-model class="model" src="../assets/models/gltf/duck/Duck.gltf"&gt;&lt;/x-model&gt;
       </pre>
     </div>
   </div>
@@ -203,7 +208,7 @@
     <div class="test__output">
       <x-model class="model model--small model--spaced" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
       <x-model class="model model--small model--spaced" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb"></x-model>
-      <x-model class="model model--small model--spaced" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
     </div>
   </div>
 
@@ -212,11 +217,10 @@
       <h2>Translate test</h2>
     </div>
     <div class="test__output">
-      <x-model class="model model--abs" src="../assets/models/LeePerrySmith.obj" style="transform: translate3d(-50%, 0, 0)"></x-model>
-      <x-model class="model model--abs" src="../assets/models/LeePerrySmith.obj" style="transform: translate3d(-25%, 0, -400px)"></x-model>
-      <x-model class="model model--abs" src="../assets/models/LeePerrySmith.obj" style="transform: translate3d(0, 0, -800px)"></x-model>
-      <x-model class="model model--abs" src="../assets/models/LeePerrySmith.obj" style="transform: translate3d(25% ,0, -400px)"></x-model>
-      <x-model class="model model--abs" src="../assets/models/LeePerrySmith.obj" style="transform: translate3d(50%, 0, 0)"></x-model>
+      <x-model class="model model--medium model--abs" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translate3d(-75%, 0, -400px)"></x-model>
+      <x-model class="model model--medium model--abs" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translate3d(0, 0, -800px)"></x-model>
+      <x-model class="model model--medium model--abs" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translate3d(75% ,0, -400px)"></x-model>
+      <x-model class="model model--medium model--abs" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translate3d(0, 0, 0)"></x-model>
     </div>
   </div>
 
@@ -225,9 +229,9 @@
       <h2>Rotate test</h2>
     </div>
     <div class="test__output">
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform: rotateX(45deg)"></x-model>
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform: rotateY(45deg)"></x-model>
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform: rotateZ(45deg)"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="transform: rotateX(45deg)"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="transform: rotateY(45deg)"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="transform: rotateZ(45deg)"></x-model>
     </div>
   </div>
 
@@ -236,9 +240,9 @@
       <h2>Scale test</h2>
     </div>
     <div class="test__output">
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform: scale3d(.25,.25,.25)"></x-model>
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform: scale3d(1.25,1.25,1.25)"></x-model>
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform: scale3d(.5,.5,.5)"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="transform: scale3d(.25,.25,.25)"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="transform: scale3d(1.25,1.25,1.25)"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="transform: scale3d(.5,.5,.5)"></x-model>
     </div>
   </div>
 
@@ -247,10 +251,10 @@
       <h2>Animation test</h2>
     </div>
     <div class="test__output">
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="animation: 5s spin-x linear infinite"></x-model>
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="animation: 5s spin-y linear infinite"></x-model>
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="animation: 5s spin-z linear infinite"></x-model>
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="animation: 5s spin-xyz linear infinite"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="animation: 5s spin-x linear infinite"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="animation: 5s spin-y linear infinite"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="animation: 5s spin-z linear infinite"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="animation: 5s spin-xyz linear infinite"></x-model>
     </div>
   </div>
 
@@ -260,27 +264,28 @@
     </div>
     <div class="test__output">
       <div class="model-wrap" style="animation: 5s spin-x linear infinite">
-        <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="animation: 5s spin-y linear infinite"></x-model>
+        <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="animation: 5s spin-y linear infinite"></x-model>
       </div>
     </div>
   </div>
 
-  <div class="test test--8 test--fail">
+  <!--<div class="test test--8 test--fail">
     <div class="test__info">
       <h2>Nested transform test 2</h2>
       <p>This test fails because elements aren't correctly aligned when using translate(-50%, -50%) to centre an object.</p>
     </div>
     <div class="test__output">
       <div class="model-wrap" style="animation: 5s spin-xyz linear infinite">
-        <x-model class="model model--tiny" src="../assets/models/teapot.obj" style="transform: translate(-50%, -50%) translateZ(-20vmin)"></x-model>
-        <x-model class="model model--tiny" src="../assets/models/teapot.obj" style="transform: translate(-50%, -50%) translateZ(20vmin)"></x-model>
-        <x-model class="model model--tiny" src="../assets/models/teapot.obj" style="transform: translate(-50%, -50%) translateY(-20vmin)"></x-model>
-        <x-model class="model model--tiny" src="../assets/models/teapot.obj" style="transform: translate(-50%, -50%) translateY(20vmin)"></x-model>
-        <x-model class="model model--tiny" src="../assets/models/teapot.obj" style="transform: translate(-50%, -50%) translateX(-20vmin)"></x-model>
-        <x-model class="model model--tiny" src="../assets/models/teapot.obj" style="transform: translate(-50%, -50%) translateX(20vmin)"></x-model>
+        <x-model class="model model--tiny" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translate(-50%, -50%) translateZ(-20vmin)"></x-model>
+        <x-model class="model model--tiny" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translate(-50%, -50%) translateZ(20vmin)"></x-model>
+        <x-model class="model model--tiny" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translate(-50%, -50%) translateY(-20vmin)"></x-model>
+        <x-model class="model model--tiny" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translate(-50%, -50%) translateY(20vmin)"></x-model>
+        <x-model class="model model--tiny" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translate(-50%, -50%) translateX(-20vmin)"></x-model>
+        <x-model class="model model--tiny" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translate(-50%, -50%) translateX(20vmin)"></x-model>
       </div>
     </div>
   </div>
+  -->
 
   <div class="test test--9">
     <div class="test__info">
@@ -292,12 +297,12 @@
         <div class="model-wrap" style="animation: 5s spin-x linear infinite">
           <div class="model-wrap" style="animation: 5s spin-y linear infinite">
               <div class="model-wrap" style="animation: 5s spin-z linear infinite">
-                <x-model class="model model--tiny model--abs" src="../assets/models/teapot.obj" style="transform: translateZ(-20vmin)"></x-model>
-                <x-model class="model model--tiny model--abs" src="../assets/models/teapot.obj" style="transform: translateZ(20vmin)"></x-model>
-                <x-model class="model model--tiny model--abs" src="../assets/models/teapot.obj" style="transform: translateY(-20vmin)"></x-model>
-                <x-model class="model model--tiny model--abs" src="../assets/models/teapot.obj" style="transform: translateY(20vmin)"></x-model>
-                <x-model class="model model--tiny model--abs" src="../assets/models/teapot.obj" style="transform: translateX(-20vmin)"></x-model>
-                <x-model class="model model--tiny model--abs" src="../assets/models/teapot.obj" style="transform: translateX(20vmin)"></x-model>
+                <x-model class="model model--tiny model--abs" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translateZ(-20vmin)"></x-model>
+                <x-model class="model model--tiny model--abs" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translateZ(20vmin)"></x-model>
+                <x-model class="model model--tiny model--abs" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translateY(-20vmin)"></x-model>
+                <x-model class="model model--tiny model--abs" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translateY(20vmin)"></x-model>
+                <x-model class="model model--tiny model--abs" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translateX(-20vmin)"></x-model>
+                <x-model class="model model--tiny model--abs" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb" style="transform: translateX(20vmin)"></x-model>
             </div>
           </div>
         </div>
@@ -310,9 +315,9 @@
       <h2>Origin test</h2>
     </div>
     <div class="test__output">
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform-origin: 0 0 0;animation: 5s spin-z linear infinite"></x-model>
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform-origin: 50% 50% -140px;animation: 5s spin-x linear infinite"></x-model>
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj" style="transform-origin: 100% 100% 0;animation: 5s spin-z linear infinite"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="transform-origin: 0 0 0;animation: 5s spin-z linear infinite"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="transform-origin: 50% 50% -140px;animation: 5s spin-x linear infinite"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf" style="transform-origin: 100% 100% 0;animation: 5s spin-z linear infinite"></x-model>
     </div>
   </div>
 
@@ -321,15 +326,15 @@
       <h2>Perspective test</h2>
     </div>
     <div class="test__output">
-      <x-model class="model model--small model--spaced" src="../assets/models/LeePerrySmith.obj"></x-model>
-      <x-model class="model model--small model--spaced" src="../assets/models/teapot.obj"></x-model>
-      <x-model class="model model--small model--spaced" src="../assets/models/LeePerrySmith.obj"></x-model>
-      <x-model class="model model--small model--spaced" src="../assets/models/teapot.obj"></x-model>
-      <x-model class="model model--small model--spaced" src="../assets/models/LeePerrySmith.obj"></x-model>
-      <x-model class="model model--small model--spaced" src="../assets/models/teapot.obj"></x-model>
-      <x-model class="model model--small model--spaced" src="../assets/models/LeePerrySmith.obj"></x-model>
-      <x-model class="model model--small model--spaced" src="../assets/models/teapot.obj"></x-model>
-      <x-model class="model model--small model--spaced" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/glb/CesiumMilkTruck/CesiumMilkTruck.glb"></x-model>
+      <x-model class="model model--small model--spaced" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
     </div>
   </div>
 
@@ -339,12 +344,12 @@
       <p>Scroll horizontally</p>
     </div>
     <div class="test__output">
-      <x-model class="model model--spaced  model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
-      <x-model class="model model--spaced  model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
-      <x-model class="model model--spaced  model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
-      <x-model class="model model--spaced  model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
-      <x-model class="model model--spaced  model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
-      <x-model class="model model--spaced  model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <x-model class="model model--spaced  model--small" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
+      <x-model class="model model--spaced  model--small" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
+      <x-model class="model model--spaced  model--small" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
+      <x-model class="model model--spaced  model--small" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
+      <x-model class="model model--spaced  model--small" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
+      <x-model class="model model--spaced  model--small" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
     </div>
   </div>
 
@@ -353,7 +358,7 @@
       <h2>State test (:hover)</h2>
     </div>
     <div class="test__output">
-      <x-model class="model model--small" src="../assets/models/LeePerrySmith.obj"></x-model>
+      <x-model class="model model--small" src="../assets/models/gltf/duck/Duck.gltf"></x-model>
     </div>
   </div>
 
@@ -363,7 +368,6 @@
 
   <script src="../assets/js/vendor/custom-element-polyfill.min.js"></script>
   <script src="../assets/js/vendor/three.min.js"></script>
-  <script src="../assets/js/vendor/three-obj-loader.min.js"></script>
   <script src="../assets/js/vendor/three-gltf-loader.min.js"></script>
   <script src="../../dist/model-element.min.js"></script>
 </body>
