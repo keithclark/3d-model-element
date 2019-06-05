@@ -22,7 +22,7 @@
 
   const update = () => {
     if (!paused) {
-      requestAnimationFrame(update);
+      requestIdleCallback(update);
     }
 
     if (upKeyPressed) {
